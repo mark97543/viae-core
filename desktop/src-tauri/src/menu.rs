@@ -3,7 +3,7 @@ use tauri::{
     Runtime,
 };
 
-pub fn create_menu<R:Runtime>(app: &tauri::AppHandle<R>)-> tauri::Result<Menu<R>>{
+pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
     //Define the individual Action items
     let quit_item = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
     //Build the subMenus
