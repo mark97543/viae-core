@@ -21,3 +21,43 @@ body,
     overflow: hidden;
 
 }
+
+button, .button {
+    background: linear-gradient(180deg, #D32F2F 0%, #b71c1c 100%);
+    color: #ffffff;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid #9a1111;
+    border-top: 1px solid #ef5350; /* Bright highlight for 3D pop */
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(211, 47, 47, 0.4);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    position: relative;
+    user-select: none;
+}
+
+button:hover, .button:hover {
+    background: linear-gradient(180deg, #ef5350 0%, #D32F2F 100%);
+    border-color: #ff7961;
+    box-shadow: 0 0 12px rgba(239, 83, 80, 0.6), 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+}
+
+button:active, .button:active {
+    background: #9a1111;
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    border-color: #7f0000;
+    border-top: 1px solid #9a1111;
+}
+
+button:focus-visible, .button:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
