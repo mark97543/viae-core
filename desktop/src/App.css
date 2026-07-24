@@ -1,0 +1,23 @@
+:root {
+    --bg-primary: #000000;
+    /* Pure black for power management & contrast */
+    --bg-surface: #0a0f1d;
+    /* Deep tactical dark for cards/panels */
+    --text-main: #f8fafc;
+    /* Crisp white for maximum legibility */
+    --text-muted: #94a3b8;
+    /* Muted gray for secondary labels */
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    overflow: hidden;
+
+}
