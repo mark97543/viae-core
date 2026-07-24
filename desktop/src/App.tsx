@@ -33,7 +33,7 @@ function App() {
     <div>
 
       <Splash splash={currentView === 'splash'} />
-      <MapTool maptool_display={currentView === 'maptool'} />
+      <MapTool maptool_display={currentView === 'maptool'} setView={setCurrentView} />
       <Map map_display={currentView === 'map'} />
     </div>
   );
