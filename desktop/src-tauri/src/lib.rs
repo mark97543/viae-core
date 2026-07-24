@@ -15,7 +15,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             greet,
-            tool::get_file_size
+            tool::get_file_size,
+            tool::import_map_file
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file

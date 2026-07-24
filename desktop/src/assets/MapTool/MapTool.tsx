@@ -34,6 +34,19 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
         }
     }
 
+    //Function to start import 
+    const handleConfirmImport = async () => {
+        if (!filePath) return;
+
+        try {
+            const result = await invoke('import_map_file', { filePath: filePath });
+            console.log(result);
+            //TODO: Status Moniter here
+        } catch (error) {
+            console.error("Failed to copy map file: ", error)
+        }
+    }
+
     return (
         <div className="MapTool_Wrapper" style={{ display: maptool_display ? 'flex' : 'none' }}>
             <div className="MapTool_Card">
@@ -54,7 +67,7 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
                     </div>
 
                     <div className="MapTool_Actions">
-                        <button className='button'>Import Map</button>
+                        <button className='button' onClick={() => handleConfirmImport()}>Import Map</button>
                         <button className='button' onClick={handleFileImport}>
                             {filePath ? 'Change File' : 'Browse Files'}
                         </button>
