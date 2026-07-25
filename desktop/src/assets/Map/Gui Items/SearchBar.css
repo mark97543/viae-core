@@ -2,7 +2,8 @@
     position: absolute;
     top: 24px;
     left: 50%;
-    transform: translateX(-50%);
+    /* 320px left panel means the center of the available space is offset by 160px */
+    transform: translateX(calc(-50% + 160px));
     z-index: 900; /* Stays in front of map, but behind the POIPopup (z-index 1000) */
     width: 100%;
     max-width: 450px;
@@ -19,7 +20,7 @@
 .search-bar-container:focus-within {
     border-color: rgba(56, 189, 248, 0.6);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.25);
-    transform: translateX(-50%) translateY(-2px); /* Slight lift on focus */
+    transform: translateX(calc(-50% + 160px)) translateY(-2px); /* Slight lift on focus */
 }
 
 .search-bar-input {
@@ -40,13 +41,13 @@
     letter-spacing: 0.5px;
 }
 
-/* When POI popup is open, shift the search bar to center it in the remaining space and shrink it slightly */
+/* When POI popup is open on the right (380px), center it between LeftPanel (320px) and POIPopup */
 .search-bar-container.shifted {
     max-width: 360px;
-    /* Translate -50% for centering, then subtract half the width of the POIPopup (approx 200px) */
-    transform: translateX(calc(-50% - 200px));
+    /* center = 50vw + (320px left - 380px right) / 2 = 50vw - 30px */
+    transform: translateX(calc(-50% - 30px));
 }
 
 .search-bar-container.shifted:focus-within {
-    transform: translateX(calc(-50% - 200px)) translateY(-2px);
+    transform: translateX(calc(-50% - 30px)) translateY(-2px);
 }

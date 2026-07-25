@@ -9,6 +9,7 @@ import SearchBar from './Gui Items/SearchBar';
 import { THEMES, setupMapLibre } from './mapConfig';
 import { parseCoordinates } from './mapUtils';
 import { useTacticalMap } from './hooks/useTacticalMap';
+import LeftPanel from './popups/LeftPanel';
 
 // Initialize the map worker and custom mbtiles protocol globally
 setupMapLibre();
@@ -85,6 +86,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
             <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup} />
+            <LeftPanel />
         </div>
     )
 }

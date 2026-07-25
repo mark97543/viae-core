@@ -130,37 +130,20 @@ This will place the map on the screen and allow some manipulation. Routing will 
 
 ## Version v0.3 Cursus (The Course / Journey)
 This we will be adding points to a left bar to organize poi,s in order then routes between the points.After We will be adding draggable waypoints and rerouting around them.
-- []
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- [ ] **Left Sidebar UI (Trip Organizer)**
+  - [X] Create glassmorphic sliding panel on the left side of the screen.
+  - [ ] Add "Add to Trip" button in the POIPopup and MarkerPopup.
+  - [ ] Display a list of added POIs/Coordinates in the sidebar.
+  - [ ] Implement drag-and-drop reordering for the list of stops.
+- [ ] **Routing & Pathfinding**
+  - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
+  - [ ] Calculate routes between the ordered points in the Trip list.
+  - [ ] Draw route polylines on the MapLibre map layer.
+- [ ] **Draggable Waypoints**
+  - [ ] Render intermediate route waypoints on the map.
+  - [ ] Allow user to click and drag waypoints to alter the route.
+  - [ ] Dynamically recalculate and redraw the route on drag release.
 
 
 
