@@ -8,6 +8,7 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
 
     const [filePath, setFilePath] = useState('');
     const [fileSize, setFileSize] = useState('')
+    const [isImporting, setIsImporting] = useState(false);
 
     //function to open file picker
     const handleFileImport = async () => {
@@ -38,12 +39,20 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
     const handleConfirmImport = async () => {
         if (!filePath) return;
 
+        setIsImporting(true);
         try {
             const result = await invoke('import_map_file', { filePath: filePath });
             console.log(result);
-            //TODO: Status Moniter here
+            // Navigate back to the map view when completed successfully
+            setView('map');
+            // Reset for next time
+            setFilePath('');
+            setFileSize('');
         } catch (error) {
-            console.error("Failed to copy map file: ", error)
+            console.error("Failed to copy map file: ", error);
+            alert("Map Compilation Failed: " + error);
+        } finally {
+            setIsImporting(false);
         }
     }
 
@@ -67,11 +76,20 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
                     </div>
 
                     <div className="MapTool_Actions">
-                        <button className='button' onClick={() => handleConfirmImport()}>Import Map</button>
-                        <button className='button' onClick={handleFileImport}>
-                            {filePath ? 'Change File' : 'Browse Files'}
-                        </button>
-                        <button className='button' onClick={() => setView('map')}>Cancel</button>
+                        {isImporting ? (
+                            <div style={{ color: '#ff4444', fontWeight: 'bold', textAlign: 'center', padding: '10px 0' }}>
+                                Forging tactical assets...<br/>
+                                <span style={{fontSize: '0.9em', color: '#aaaaaa'}}>This process may take several minutes depending on the map size.</span>
+                            </div>
+                        ) : (
+                            <>
+                                <button className='button' onClick={() => handleConfirmImport()}>Import Map</button>
+                                <button className='button' onClick={handleFileImport}>
+                                    {filePath ? 'Change File' : 'Browse Files'}
+                                </button>
+                                <button className='button' onClick={() => setView('map')}>Cancel</button>
+                            </>
+                        )}
                     </div>
 
                     <div className="MapTool_Warning">

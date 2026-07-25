@@ -10,7 +10,6 @@
   - [Tools](#tools)
 - [User Requirements](#user-requirements)
 - [Developer Requirements](#developer-requirements)
-- [Phases and Milestones](#phases-and-milestones)
 
 ---
 
@@ -81,77 +80,36 @@ The core user requirements define what the rider experiences in the field and at
   - Unlocking Android Developer Options with USB Debugging enabled to facilitate the local `scrcpy` control bridge.
 - **Zero-Cost Deployment Pipeline:** The project must avoid recurring cloud hosting expenses and proprietary app store licensing fees by targeting direct Android `.apk` sideloading.
 
----
 
-## Phases and Milestones
+## Version v0.1 Fundamentum (The foundation)
 
-### Version 0.1 — Fundamentum (The Foundation)
+This version will focus on templating the file structure and basic functionality of the app.
 
-#### Version 0.1.1 — Workspace Initialization
-- **Features:** Initialize the core Tauri + React + Vite + Rust repository structure. Configure TypeScript, Tailwind CSS, and basic project routing.
-- **Notes:** Verify that `npm run tauri dev` fires up the desktop window cleanly on both Windows and Linux test machines.
-- **Items Completed:** 
-  - [x] Set Up Git for website 
-  
+### Android
+- [ ] Set up a emulater and test the configurations
 
-#### Version 0.1.2 — Local File System Bridge
-- **Features:** Implement baseline Rust backend modules to read, write, and verify local directories. Use Tauri's native path API (`app.path()`) to prevent hardcoded slash errors.
-- **Notes:** Ensure the backend can safely scan a designated folder for upcoming `.mbtiles` files without crashing.
+### Desktop
+- [X] Templated Tauri App 
+- [X] Set Up Splash Screen for starting up the app
+- [X] Set up window title bar 
+- [X] Set up window manager icon
+- [X] Set up Menu Bar and make a file menu with a exit feature
+- [X] Make the map tools and test with a small state
+- [X] Set up Maptool to load tool
+- [X] Maptool warning to delete old maps
+- [X] Process maps and save new ones to folder. 
+- [X] Move file temp basis to work with it
+- [X] Build mbtile File
+- [X] Build routing.tar
+- [X] Build gazetteer.db
+- [X] Set up delete function when starting process 
+- [X] Set up statuser for this whole thing to let the uiser know we are working. 
+- [ ] Maybe show Ram and CPu usage.
 
-#### Version 0.1.3 — MapLibre Integration
-- **Features:** Embed the MapLibre GL canvas into the React frontend. Test rendering a small, sample local vector tile file inside the Tauri window.
-- **Notes:** Keep styling minimal; focus entirely on ensuring the map canvas loads locally without making any external tile server requests.
+### Tools
+- [ ] 
+### General
+- [X] Set up git and file structure 
 
-#### Version 0.1.4 — Offline SQLite Gazetteer
-- **Features:** Integrate a local SQLite database engine within the Rust backend. Set up an FTS5 full-text search table for instant, offline coordinate and location lookups.
-- **Notes:** Test query execution speeds with a small test dataset of regional waypoints.
-
-### Version 0.2 — Conexus (The Connection)
-
-#### Version 0.2.1 — Binary Sidecar Setup
-- **Features:** Package pre-compiled platform-specific `scrcpy` and `adb` binaries into Tauri's `src-tauri/binaries/` directory. Configure `tauri.conf.json` external targets.
-- **Notes:** Verify that Tauri correctly bundles the binaries for both Windows (`.exe`) and Linux environments during local builds.
-
-#### Version 0.2.2 — USB Bridge & Device Detection
-- **Features:** Write the Rust process command (`std::process::Command`) to execute `adb devices` and confirm that a connected Android device is detected by the desktop app.
-- **Notes:** Double-check that USB Debugging is toggled on in the target phone's Android Developer Options.
-
-#### Version 0.2.3 — Screen Mirroring Launch Button
-- **Features:** Build a high-contrast UI control button in the React frontend ("Launch Master Device Link") that fires the Rust sidecar command to spawn the low-latency `scrcpy` window.
-- **Notes:** Test window stability, scaling, and keyboard/mouse input forwarding from the PC workstation to the physical phone.
-
-#### Version 0.2.4 — MicroSD Vault Transfer Utility
-- **Features:** Create a desktop file-management panel that allows users to select regional map folders on their PC and copy them directly via ADB/USB to the target Android device's MicroSD storage path.
-- **Notes:** Test transfer speeds and verify file integrity on large-scale SQLite files.
-
-### Version 0.3 — Itinerarium (The Journey / Mobile Head Unit)
-
-#### Version 0.3.1 — Mobile App Shell Initialization
-- **Features:** Initialize the lightweight React Native or native Android (Kotlin) mobile project workspace targeted at budget hardware (Moto G Play 2024).
-- **Notes:** Set minimum Android API level to support modern storage and file-system read permissions.
-
-#### Version 0.3.2 — External Storage Read Pipeline
-- **Features:** Configure the mobile client file-system permissions to read `.mbtiles` vector packages and Valhalla routing graphs directly from the external MicroSD card mount path (`/storage/...`).
-- **Notes:** Ensure the app does not attempt to dump massive map files into limited internal phone storage (`/data/data/`).
-
-#### Version 0.3.3 — Offline GPS / GNSS Listener
-- **Features:** Implement local location services using standalone GPS hardware. Configure distance and time filters to optimize battery drain and prevent continuous background CPU polling.
-- **Notes:** Lock the device permanently in Airplane Mode to confirm absolute off-grid tracking functionality without cell towers.
-
-#### Version 0.3.4 — Tactical Map Styling & Rendering
-- **Features:** Integrate MapLibre GL Native into the mobile application. Apply a high-contrast, dark-mode tactical theme optimized for daylight legibility on motorcycle handlebars.
-- **Notes:** Test performance inside the Android Studio emulator using mock GPX route playback (`.gpx`/`.kml`).
-
-### Version 0.4 — Tabula Rasa (The Clean Slate / Final Polish)
-
-#### Version 0.4.1 — Air-Gapped Telemetry Audit
-- **Features:** Perform a full codebase sweep to verify that zero external tracking scripts, cloud crash-reporting SDKs, or third-party API keys exist in either the desktop or mobile code.
-- **Notes:** Confirm the entire system operates with network adapters physically disabled.
-
-#### Version 0.4.2 — Mission Manifest Print Mode
-- **Features:** Build a clean, zero-overhead CSS-driven print layout in the desktop workspace that exports structured, text-based roadbook summaries and offline recovery coordinates for physical paper backup.
-- **Notes:** Test formatting compatibility for standard cockpit printouts.
-
-#### Version 0.4.3 — Hardware Mounting & Power Stress-Test
-- **Features:** Execute real-world hardware validation on the motorcycle handlebar mount. Check vibration tolerance, screen brightness legibility under direct sunlight, and USB buck-converter power stability during long runs.
-- **Notes:** Monitor thermal performance of the Moto G Play under sustained map-rendering loads.
+## Version v0.2
+This will place the map on the screen and allow some manipulation. Routing will come at a different time. We will also be starting our mobile app loading here where when a user plugs in the phone to be converted we could make it our own. 

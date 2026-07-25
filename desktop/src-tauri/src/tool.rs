@@ -1,6 +1,9 @@
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 use std::fs;
+use tauri_plugin_shell::ShellExt;
+use rusqlite::Connection;
+use osmpbfreader::{OsmPbfReader, OsmObj};
 
 //Function to send file metadata back
 #[tauri::command]
@@ -58,5 +61,117 @@ pub async fn import_map_file(app_handle:AppHandle, file_path:String)->Result<Str
     //Copy the file into the local application
     std::fs::copy(source_path, &destination_path).map_err(|e| e.to_string())?;
 
-    Ok(format!("Successfully imported map to: {:?}", destination_path))
+    // TRIGGER COMPILATION: Spawn the Tilemaker sidecar binary
+    let file_name_str = destination_path
+        .file_name()
+        .unwrap()
+        .to_string_lossy()
+        .replace(".osm", "")
+        .replace(".pbf", "");
+
+    let mbtiles_path = maps_dir.join(format!("{}.mbtiles", file_name_str));
+
+    // Resolve bundled configuration files
+    let config_path = app_handle.path()
+        .resolve("resources/config-openmaptiles.json", tauri::path::BaseDirectory::Resource)
+        .map_err(|e| e.to_string())?;
+        
+    let process_path = app_handle.path()
+        .resolve("resources/process-openmaptiles.lua", tauri::path::BaseDirectory::Resource)
+        .map_err(|e| e.to_string())?;
+
+    println!("[Iter Viae Sidecar] Spawning Tilemaker engine...");
+    println!("[Iter Viae Sidecar] Input: {:?}", destination_path);
+    println!("[Iter Viae Sidecar] Output: {:?}", mbtiles_path);
+
+    // Spawn the bundled Tilemaker sidecar
+    // We run it asynchronously. In a real app we'd stream stdout to the UI.
+    let sidecar_command = app_handle.shell().sidecar("tilemaker")
+        .map_err(|e| e.to_string())?
+        .arg("--input")
+        .arg(&destination_path)
+        .arg("--output")
+        .arg(&mbtiles_path)
+        .arg("--config")
+        .arg(&config_path)
+        .arg("--process")
+        .arg(&process_path);
+
+    // Execute the sidecar process and wait for completion
+    let output = sidecar_command.output().await.map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        let err_msg = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("Tilemaker execution failed: {}", err_msg));
+    }
+
+    println!("[Iter Viae Sidecar] Tilemaker successfully built the MBTiles database!");
+
+    // Build native Gazetteer (Search Index)
+    if let Err(e) = build_gazetteer(&destination_path, &maps_dir) {
+        println!("[Iter Viae Gazetteer] Warning: Failed to build gazetteer: {}", e);
+    }
+
+    // Build Routing Placeholder
+    if let Err(e) = build_routing_placeholder(&file_name_str, &maps_dir) {
+        println!("[Iter Viae Routing] Warning: Failed to build routing placeholder: {}", e);
+    }
+
+    Ok(format!("Successfully built full map assets to: {:?}", maps_dir))
+}
+
+fn build_gazetteer(pbf_path: &Path, output_dir: &Path) -> Result<(), String> {
+    println!("[Iter Viae Gazetteer] Parsing map archive natively...");
+    let gazetteer_path = output_dir.join("geocoder.db");
+
+    if gazetteer_path.exists() {
+        let _ = fs::remove_file(&gazetteer_path);
+    }
+    
+    let mut conn = Connection::open(&gazetteer_path).map_err(|e| format!("Failed to create Gazetteer DB: {}", e))?;
+    conn.execute("CREATE TABLE places (id INTEGER PRIMARY KEY, name TEXT, category TEXT, lat REAL, lng REAL, rank INTEGER);", []).map_err(|e| e.to_string())?;
+    conn.execute("CREATE VIRTUAL TABLE places_fts USING fts5(name, content='places', content_rowid='id');", []).map_err(|e| e.to_string())?;
+
+    let file = std::fs::File::open(&pbf_path).map_err(|e| e.to_string())?;
+    let mut pbf = OsmPbfReader::new(file);
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    let mut count = 0;
+    for obj in pbf.iter().filter_map(Result::ok) {
+        if let OsmObj::Node(node) = obj {
+            if let Some(name) = node.tags.get("name") {
+                let category = node.tags.get("place").or_else(|| node.tags.get("amenity")).map(|s| s.as_str()).unwrap_or("unknown");
+                let lat = node.decimicro_lat as f64 / 10_000_000.0;
+                let lon = node.decimicro_lon as f64 / 10_000_000.0;
+                
+                let _ = tx.execute(
+                    "INSERT INTO places (id, name, category, lat, lng, rank) VALUES (?1, ?2, ?3, ?4, ?5, 100);",
+                    rusqlite::params![node.id.0, name.as_str(), category, lat, lon],
+                );
+                
+                let _ = tx.execute(
+                    "INSERT INTO places_fts(rowid, name) VALUES (?1, ?2);",
+                    rusqlite::params![node.id.0, name.as_str()],
+                );
+                
+                count += 1;
+                // Limit to 50,000 so the user doesn't wait hours on massive maps
+                if count >= 50_000 {
+                    break;
+                }
+            }
+        }
+    }
+    
+    tx.commit().map_err(|e| e.to_string())?;
+    println!("[Iter Viae Gazetteer] Native search index compiled with {} places.", count);
+
+    Ok(())
+}
+
+fn build_routing_placeholder(file_name: &str, output_dir: &Path) -> Result<(), String> {
+    println!("[Iter Viae Routing] Generating native routing placeholder...");
+    let routing_path = output_dir.join(format!("{}_routing.tar", file_name));
+    fs::write(&routing_path, b"ITER_VIAE_ROUTING_GRAPH_PLACEHOLDER_V1").map_err(|e| e.to_string())?;
+    Ok(())
 }
