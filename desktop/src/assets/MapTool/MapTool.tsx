@@ -2,7 +2,7 @@ import './MapTool.css'
 import { open } from '@tauri-apps/plugin-dialog';
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Size } from '@tauri-apps/api/dpi';
+
 
 const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setView: (view: 'splash' | 'map' | 'maptool') => void }) => {
 
@@ -78,8 +78,8 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
                     <div className="MapTool_Actions">
                         {isImporting ? (
                             <div style={{ color: '#ff4444', fontWeight: 'bold', textAlign: 'center', padding: '10px 0' }}>
-                                Forging tactical assets...<br/>
-                                <span style={{fontSize: '0.9em', color: '#aaaaaa'}}>This process may take several minutes depending on the map size.</span>
+                                Forging tactical assets...<br />
+                                <span style={{ fontSize: '0.9em', color: '#aaaaaa' }}>This process may take several minutes depending on the map size.</span>
                             </div>
                         ) : (
                             <>

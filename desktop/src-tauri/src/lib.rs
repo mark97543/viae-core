@@ -1,5 +1,7 @@
 mod menu;
 mod tool;
+mod commands;
+mod maptiles;
 use tauri::Emitter;
 
 
@@ -10,6 +12,12 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
@@ -17,7 +25,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             tool::get_file_size,
-            tool::import_map_file
+            tool::import_map_file,
+            crate::commands::get_map_tile,
+            crate::commands::get_map_metadata
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file
@@ -26,7 +36,8 @@ pub fn run() {
 
             //Listen for the menu item clickcs
             app.on_menu_event(|app_handle, event| {
-                match event.id().as_ref() {
+                let id = event.id().as_ref();
+                match id {
                     "quit" => {
                         app_handle.exit(0);
                     }
@@ -34,7 +45,15 @@ pub fn run() {
                         //Send the signal to the front end
                         let _ = app_handle.emit("navigate-to-view", "map-loader");
                     }
-                    _ => {}
+                    _ => {
+                        let themes = [
+                            "klokantech-basic", "klokantech-3d", "osm-liberty", "maptiler-basic",
+                            "maptiler-3d", "osm-bright", "toner", "fiord-color", "dark-matter", "positron"
+                        ];
+                        if themes.contains(&id) {
+                            let _ = app_handle.emit("change-theme", id);
+                        }
+                    }
                 }
             });
             Ok(())

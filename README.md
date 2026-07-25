@@ -104,12 +104,16 @@ This version will focus on templating the file structure and basic functionality
 - [X] Build gazetteer.db
 - [X] Set up delete function when starting process 
 - [X] Set up statuser for this whole thing to let the uiser know we are working. 
-- [ ] Maybe show Ram and CPu usage.
-
-### Tools
-- [ ] 
+ 
 ### General
 - [X] Set up git and file structure 
 
-## Version v0.2
+## Version v0.2 Tabula (The Map)
 This will place the map on the screen and allow some manipulation. Routing will come at a different time. We will also be starting our mobile app loading here where when a user plugs in the phone to be converted we could make it our own. 
+
+### Desktop App
+- [X] Display Map
+  - Resolved `maplibregl` namespace TypeScript errors.
+  - Integrated multiple map themes.
+  - Set default map theme to `klokantech-basic` (with `osm-bright` as a secondary option).
+- [X] Theme Switeher 

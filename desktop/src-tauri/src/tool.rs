@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tauri::{AppHandle, Manager};
 use std::fs;
 use tauri_plugin_shell::ShellExt;
