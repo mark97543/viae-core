@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Map, addProtocol, setWorkerUrl, NavigationControl } from 'maplibre-gl';
+import { Map, addProtocol, setWorkerUrl, NavigationControl, Popup } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './TacticalMap.css';
+import POIPopup from './popups/POIPopup';
 
 const THEMES = [
     'dark-matter',
@@ -57,7 +58,9 @@ interface TacticalMapProps {
 export default function TacticalMap({ activeMapFile = "default.mbtiles" }: TacticalMapProps) {
 
     const mapContainer = useRef<HTMLDivElement>(null);
-    const [theme, setTheme] = useState('klokantech-basic');
+    const [theme, setTheme] = useState('osm-bright');
+    const [poiPopup, setPoiPopup] = useState(false);
+    const [poiData, setPoiData] = useState('')
 
     useEffect(() => {
         const unlisten = listen<string>('change-theme', (event) => {
@@ -121,6 +124,46 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 }
             })
 
+            //POIs Logic
+            map.on('load', () => {
+                if (!map) return;
+
+                // Find all layer IDs that belong to the 'poi' source-layer (which handles POI labels across different themes)
+                const style = map.getStyle();
+                const poiLayers = style.layers?.filter(layer => (layer as any)['source-layer'] === 'poi').map(layer => layer.id) || [];
+
+                if (poiLayers.length > 0) {
+                    //Change the cursor to a pointer when hovering over a native POI
+                    map.on('mouseenter', poiLayers, () => {
+                        map!.getCanvas().style.cursor = 'pointer'
+                    })
+
+                    //Reset cursor back to default when leaving poi
+                    map.on('mouseleave', poiLayers, () => {
+                        map!.getCanvas().style.cursor = 'grab'
+                    })
+
+                    //Click POI Event
+                    map.on('click', poiLayers, async (e) => {
+                        if (!e.features || e.features.length === 0) return;
+
+                        const clickedPoi = e.features[0];
+                        const coordinates = (clickedPoi.geometry as any).coordinates;
+                        const lng = coordinates[0];
+                        const lat = coordinates[1];
+                        try {
+                            const details = await invoke<any>('get_poi_details', { lat, lng })
+                            console.log("Details:", details);
+                            setPoiData(details);
+                        } catch (err) {
+                            console.warn("Could not find full POI details in local DB:", err);
+                        }
+
+                        setPoiPopup(true);
+                    })
+                }
+            })
+
         }).catch(err => {
             console.error("Failed to load theme:", err);
         });
@@ -145,6 +188,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     {THEMES.map(t => <option key={t} value={t} className="bg-neutral-800 text-white">{t}</option>)}
                 </select>
             </div>
+            <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
         </div>
     )
 }

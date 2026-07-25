@@ -117,3 +117,91 @@ This will place the map on the screen and allow some manipulation. Routing will 
   - Integrated multiple map themes.
   - Set default map theme to `klokantech-basic` (with `osm-bright` as a secondary option).
 - [X] Theme Switeher 
+- [X] Dynamic Centering on cutom map
+- [X] Load POI's onto Map (Theme Based)
+- [ ] Make POI's Clickable
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Future / Roadmap
+- [ ] **3D Terrain-RGB Support**
+  - **Notes:** Need a secondary upload/processing pipeline for Terrain-RGB `.mbtiles` (separate from the `.pbf` vector data).
+  - Add a `terrain` source to MapLibre style JSON to drape roads/themes over true 3D topography.
+  - Can use tools like `rio-rgbify` to compile raw DEM GeoTIFFs (from NASA/USGS) into offline `.mbtiles` locally, or allow users to supply pre-packaged regional terrain files.

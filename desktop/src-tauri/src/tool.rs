@@ -1,5 +1,5 @@
 use std::path::Path;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Emitter};
 use std::fs;
 use tauri_plugin_shell::ShellExt;
 use rusqlite::Connection;
@@ -108,7 +108,7 @@ pub async fn import_map_file(app_handle:AppHandle, file_path:String)->Result<Str
     println!("[Iter Viae Sidecar] Tilemaker successfully built the MBTiles database!");
 
     // Build native Gazetteer (Search Index)
-    if let Err(e) = build_gazetteer(&destination_path, &maps_dir) {
+    if let Err(e) = build_gazetteer(&app_handle, &destination_path, &maps_dir) {
         println!("[Iter Viae Gazetteer] Warning: Failed to build gazetteer: {}", e);
     }
 
@@ -120,7 +120,7 @@ pub async fn import_map_file(app_handle:AppHandle, file_path:String)->Result<Str
     Ok(format!("Successfully built full map assets to: {:?}", maps_dir))
 }
 
-fn build_gazetteer(pbf_path: &Path, output_dir: &Path) -> Result<(), String> {
+fn build_gazetteer(app_handle: &AppHandle, pbf_path: &Path, output_dir: &Path) -> Result<(), String> {
     println!("[Iter Viae Gazetteer] Parsing map archive natively...");
     let gazetteer_path = output_dir.join("geocoder.db");
 
@@ -128,13 +128,14 @@ fn build_gazetteer(pbf_path: &Path, output_dir: &Path) -> Result<(), String> {
         let _ = fs::remove_file(&gazetteer_path);
     }
     
-    let mut conn = Connection::open(&gazetteer_path).map_err(|e| format!("Failed to create Gazetteer DB: {}", e))?;
-    conn.execute("CREATE TABLE places (id INTEGER PRIMARY KEY, name TEXT, category TEXT, lat REAL, lng REAL, rank INTEGER);", []).map_err(|e| e.to_string())?;
+    let conn = Connection::open(&gazetteer_path).map_err(|e| format!("Failed to create Gazetteer DB: {}", e))?;
+    conn.execute("CREATE TABLE places (id INTEGER PRIMARY KEY, name TEXT, category TEXT, lat REAL, lng REAL, rank INTEGER, tags TEXT);", []).map_err(|e| e.to_string())?;
     conn.execute("CREATE VIRTUAL TABLE places_fts USING fts5(name, content='places', content_rowid='id');", []).map_err(|e| e.to_string())?;
 
     let file = std::fs::File::open(&pbf_path).map_err(|e| e.to_string())?;
     let mut pbf = OsmPbfReader::new(file);
-    let tx = conn.transaction().map_err(|e| e.to_string())?;
+    
+    conn.execute_batch("BEGIN TRANSACTION;").map_err(|e| e.to_string())?;
 
     let mut count = 0;
     for obj in pbf.iter().filter_map(Result::ok) {
@@ -144,26 +145,34 @@ fn build_gazetteer(pbf_path: &Path, output_dir: &Path) -> Result<(), String> {
                 let lat = node.decimicro_lat as f64 / 10_000_000.0;
                 let lon = node.decimicro_lon as f64 / 10_000_000.0;
                 
-                let _ = tx.execute(
-                    "INSERT INTO places (id, name, category, lat, lng, rank) VALUES (?1, ?2, ?3, ?4, ?5, 100);",
-                    rusqlite::params![node.id.0, name.as_str(), category, lat, lon],
+                let mut tags_map = std::collections::HashMap::new();
+                for (k, v) in node.tags.iter() {
+                    tags_map.insert(k.as_str(), v.as_str());
+                }
+                let tags_json = serde_json::to_string(&tags_map).unwrap_or_else(|_| "{}".to_string());
+
+                let _ = conn.execute(
+                    "INSERT INTO places (id, name, category, lat, lng, rank, tags) VALUES (?1, ?2, ?3, ?4, ?5, 100, ?6);",
+                    rusqlite::params![node.id.0, name.as_str(), category, lat, lon, tags_json],
                 );
                 
-                let _ = tx.execute(
+                let _ = conn.execute(
                     "INSERT INTO places_fts(rowid, name) VALUES (?1, ?2);",
                     rusqlite::params![node.id.0, name.as_str()],
                 );
                 
                 count += 1;
-                // Limit to 50,000 so the user doesn't wait hours on massive maps
-                if count >= 50_000 {
-                    break;
+                
+                if count % 100_000 == 0 {
+                    let _ = conn.execute_batch("COMMIT; BEGIN TRANSACTION;");
+                    let _ = app_handle.emit("gazetteer-progress", format!("Indexed {} POIs...", count));
                 }
             }
         }
     }
     
-    tx.commit().map_err(|e| e.to_string())?;
+    conn.execute_batch("COMMIT;").map_err(|e| e.to_string())?;
+    let _ = app_handle.emit("gazetteer-progress", format!("Finished! Indexed {} POIs.", count));
     println!("[Iter Viae Gazetteer] Native search index compiled with {} places.", count);
 
     Ok(())

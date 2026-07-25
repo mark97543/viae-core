@@ -14,12 +14,12 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
     
 
     //Themes
-    let theme_1 = MenuItem::with_id(app, "klokantech-basic", "Klokantech Basic (default)", true, None::<&str>)?;
+    let theme_1 = MenuItem::with_id(app, "klokantech-basic", "Klokantech Basic ", true, None::<&str>)?;
     let theme_2 = MenuItem::with_id(app, "klokantech-3d", "Klokantech 3D", true, None::<&str>)?;
     let theme_3 = MenuItem::with_id(app, "osm-liberty", "OSM Liberty", true, None::<&str>)?;
     let theme_4 = MenuItem::with_id(app, "maptiler-basic", "Maptiler Basic", true, None::<&str>)?;
     let theme_5 = MenuItem::with_id(app, "maptiler-3d", "Maptiler 3D", true, None::<&str>)?;
-    let theme_6 = MenuItem::with_id(app, "osm-bright", "OSM Bright", true, None::<&str>)?;
+    let theme_6 = MenuItem::with_id(app, "osm-bright", "OSM Bright (Default)", true, None::<&str>)?;
     let theme_7 = MenuItem::with_id(app, "toner", "Toner", true, None::<&str>)?;
     let theme_8 = MenuItem::with_id(app, "fiord-color", "Fiord Color", true, None::<&str>)?;
     let theme_9 = MenuItem::with_id(app, "dark-matter", "Dark Matter", true, None::<&str>)?;

@@ -1,7 +1,8 @@
 import './MapTool.css'
 import { open } from '@tauri-apps/plugin-dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
 
 const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setView: (view: 'splash' | 'map' | 'maptool') => void }) => {
@@ -9,6 +10,16 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
     const [filePath, setFilePath] = useState('');
     const [fileSize, setFileSize] = useState('')
     const [isImporting, setIsImporting] = useState(false);
+    const [gazetteerProgress, setGazetteerProgress] = useState('');
+
+    useEffect(() => {
+        const unlisten = listen<string>('gazetteer-progress', (event) => {
+            setGazetteerProgress(event.payload);
+        });
+        return () => {
+            unlisten.then(f => f());
+        };
+    }, []);
 
     //function to open file picker
     const handleFileImport = async () => {
@@ -48,6 +59,7 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
             // Reset for next time
             setFilePath('');
             setFileSize('');
+            setGazetteerProgress('');
         } catch (error) {
             console.error("Failed to copy map file: ", error);
             alert("Map Compilation Failed: " + error);
@@ -80,6 +92,11 @@ const MapTool = ({ maptool_display, setView }: { maptool_display: boolean, setVi
                             <div style={{ color: '#ff4444', fontWeight: 'bold', textAlign: 'center', padding: '10px 0' }}>
                                 Forging tactical assets...<br />
                                 <span style={{ fontSize: '0.9em', color: '#aaaaaa' }}>This process may take several minutes depending on the map size.</span>
+                                {gazetteerProgress && (
+                                    <div style={{ marginTop: '10px', fontSize: '0.85em', color: '#00ffff' }}>
+                                        {gazetteerProgress}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <>

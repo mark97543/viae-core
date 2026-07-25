@@ -17,3 +17,12 @@ pub async fn get_map_metadata(
 ) -> Result<serde_json::Value, String> {
     crate::maptiles::get_map_metadata(&app_handle)
 }
+
+#[tauri::command]
+pub async fn get_poi_details(
+    app_handle: tauri::AppHandle,
+    lat: f64,
+    lng: f64,
+) -> Result<crate::maptiles::PoiDetail, String> {
+    crate::maptiles::find_poi_by_coords(&app_handle, lat, lng)
+}

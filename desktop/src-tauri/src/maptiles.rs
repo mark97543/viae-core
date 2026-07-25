@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::fs;
 use tauri::{AppHandle, Manager};
 use rusqlite::{Connection, params, OptionalExtension};
+use serde::{Serialize, Deserialize};
 
 // Function to automatically find the local .mbtiles file and extract a single tile blob
 pub fn fetch_local_tile(
@@ -90,4 +91,65 @@ pub fn get_map_metadata(app_handle:&tauri::AppHandle)->Result <serde_json::Value
     }
 
     Ok(serde_json::Value::Object(map_meta))
+}
+
+
+//POI serch by lng and lat
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PoiDetail {
+    pub id: i64,
+    pub name: String,
+    pub category: Option<String>,
+    pub lat: f64,
+    pub lng: f64,
+    pub rank: Option<i32>,
+    pub tags: Option<String>,
+}
+
+pub fn find_poi_by_coords(
+    app_handle: &tauri::AppHandle,
+    target_lat: f64,
+    target_lng: f64,
+) -> Result<PoiDetail, String> {
+    let app_dir = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
+    let db_path = app_dir.join("maps").join("geocoder.db"); // Your local gazetteer file
+
+    let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+
+    // Use a wider tolerance bounding box (approx. ~500 meters) because mapbox vector tiles
+    // quantize coordinates (shift them slightly) at lower zoom levels!
+    let tolerance = 0.005; 
+
+    let mut stmt = conn.prepare(
+        "SELECT id, name, category, lat, lng, rank, tags,
+         (ABS(lat - ?1) + ABS(lng - ?2)) as dist
+         FROM places 
+         WHERE lat BETWEEN ?3 AND ?4 AND lng BETWEEN ?5 AND ?6 
+         ORDER BY dist ASC
+         LIMIT 1"
+    ).map_err(|e| e.to_string())?;
+
+    let poi = stmt.query_row(
+        params![
+            target_lat,
+            target_lng,
+            target_lat - tolerance,
+            target_lat + tolerance,
+            target_lng - tolerance,
+            target_lng + tolerance
+        ],
+        |row| {
+            Ok(PoiDetail {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                category: row.get(2)?,
+                lat: row.get(3)?,
+                lng: row.get(4)?,
+                rank: row.get(5)?,
+                tags: row.get(6).unwrap_or(None),
+            })
+        },
+    ).map_err(|e| format!("No matching POI found locally: {}", e))?;
+
+    Ok(poi)
 }

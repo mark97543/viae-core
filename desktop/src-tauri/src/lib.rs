@@ -27,7 +27,8 @@ pub fn run() {
             tool::get_file_size,
             tool::import_map_file,
             crate::commands::get_map_tile,
-            crate::commands::get_map_metadata
+            crate::commands::get_map_metadata,
+            crate::commands::get_poi_details
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file
