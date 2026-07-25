@@ -1,0 +1,41 @@
+.search-bar-container {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000; /* Bring to the absolute front of the map */
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    background-color: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-bar-container:focus-within {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.25);
+    transform: translateX(-50%) translateY(-2px); /* Slight lift on focus */
+}
+
+.search-bar-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 16px 24px;
+    font-size: 15px;
+    color: #f8fafc;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    outline: none;
+    border-radius: 12px;
+}
+
+.search-bar-input::placeholder {
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}

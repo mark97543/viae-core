@@ -119,7 +119,15 @@ This will place the map on the screen and allow some manipulation. Routing will 
 - [X] Theme Switeher 
 - [X] Dynamic Centering on cutom map
 - [X] Load POI's onto Map (Theme Based)
-- [ ] Make POI's Clickable
+- [X] Make POI's Clickable
+- [X] POI Details Pop up
+- [ ] Searchbar with placing pin on location
+- [ ] Right Click Popup for options add to trip, set as start/end.
+
+## Version v0.3 Cursus (The Course / Journey)
+This we will be adding points to a left bar to organize poi,s in order then routes between the points.After We will be adding draggable waypoints and rerouting around them.
+- []
+
 
 
 

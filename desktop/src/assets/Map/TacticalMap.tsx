@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Map, addProtocol, setWorkerUrl, NavigationControl, Popup } from 'maplibre-gl';
+import { Map, addProtocol, setWorkerUrl, NavigationControl, Popup, Marker } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './TacticalMap.css';
 import POIPopup from './popups/POIPopup';
+import SearchBar from './Gui Items/SearchBar';
 
 const THEMES = [
     'dark-matter',
@@ -58,9 +59,43 @@ interface TacticalMapProps {
 export default function TacticalMap({ activeMapFile = "default.mbtiles" }: TacticalMapProps) {
 
     const mapContainer = useRef<HTMLDivElement>(null);
+    const mapInstance = useRef<Map | null>(null);
+    const searchMarker = useRef<Marker | null>(null);
     const [theme, setTheme] = useState('osm-bright');
     const [poiPopup, setPoiPopup] = useState(false);
     const [poiData, setPoiData] = useState('')
+    const [search, setSearch] = useState('')
+
+    // Fly to coordinates only when requested
+    const executeSearch = () => {
+        if (!mapInstance.current || !search) return;
+
+        // Parse things like "38.9, -77.03" or "38.9 -77.03"
+        const parts = search.split(/[,\s]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+        
+        if (parts.length === 2) {
+            const lat = parts[0];
+            const lng = parts[1];
+            
+            // Basic coordinate validation (-90 to 90 lat, -180 to 180 lng)
+            if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                mapInstance.current.flyTo({ 
+                    center: [lng, lat], 
+                    zoom: 16,
+                    speed: 1.5 // Gives it a nice tactical swoop
+                });
+
+                // Drop or move the pin
+                if (searchMarker.current) {
+                    searchMarker.current.setLngLat([lng, lat]);
+                } else {
+                    searchMarker.current = new Marker({ color: '#38bdf8' }) // Tactical cyan to match the theme
+                        .setLngLat([lng, lat])
+                        .addTo(mapInstance.current);
+                }
+            }
+        }
+    };
 
     useEffect(() => {
         const unlisten = listen<string>('change-theme', (event) => {
@@ -107,6 +142,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 pitch: 55,       // Tilts the camera to show off the 3D buildings
                 bearing: -17.6   // Rotates the map slightly for a cinematic view
             });
+            mapInstance.current = map;
 
             //Fetch Dynamic map Center and Bounds from the local mbt tiles container via Rust
             invoke<Record<string, string>>('get_map_metadata').then((meta) => {
@@ -161,6 +197,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
 
                         setPoiPopup(true);
                     })
+
                 }
             })
 
@@ -189,6 +226,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 </select>
             </div>
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
+            <SearchBar search={search} setSearch={setSearch} executeSearch={executeSearch} />
         </div>
     )
 }
