@@ -3,7 +3,7 @@
     top: 24px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2000; /* Bring to the absolute front of the map */
+    z-index: 900; /* Stays in front of map, but behind the POIPopup (z-index 1000) */
     width: 100%;
     max-width: 450px;
     display: flex;
@@ -38,4 +38,15 @@
     color: #64748b;
     font-weight: 500;
     letter-spacing: 0.5px;
+}
+
+/* When POI popup is open, shift the search bar to center it in the remaining space and shrink it slightly */
+.search-bar-container.shifted {
+    max-width: 360px;
+    /* Translate -50% for centering, then subtract half the width of the POIPopup (approx 200px) */
+    transform: translateX(calc(-50% - 200px));
+}
+
+.search-bar-container.shifted:focus-within {
+    transform: translateX(calc(-50% - 200px)) translateY(-2px);
 }

@@ -6,6 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './TacticalMap.css';
 import POIPopup from './popups/POIPopup';
+import MarkerPopup from './popups/MarkerPopup';
 import SearchBar from './Gui Items/SearchBar';
 
 const THEMES = [
@@ -63,8 +64,10 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const searchMarker = useRef<Marker | null>(null);
     const [theme, setTheme] = useState('osm-bright');
     const [poiPopup, setPoiPopup] = useState(false);
-    const [poiData, setPoiData] = useState('')
-    const [search, setSearch] = useState('')
+    const [poiData, setPoiData] = useState('');
+    const [markerPopup, setMarkerPopup] = useState(false);
+    const [markerData, setMarkerData] = useState<{lat: number, lng: number} | null>(null);
+    const [search, setSearch] = useState('');
 
     // Fly to coordinates only when requested
     const executeSearch = () => {
@@ -72,15 +75,15 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
 
         // Parse things like "38.9, -77.03" or "38.9 -77.03"
         const parts = search.split(/[,\s]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-        
+
         if (parts.length === 2) {
             const lat = parts[0];
             const lng = parts[1];
-            
+
             // Basic coordinate validation (-90 to 90 lat, -180 to 180 lng)
             if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                mapInstance.current.flyTo({ 
-                    center: [lng, lat], 
+                mapInstance.current.flyTo({
+                    center: [lng, lat],
                     zoom: 16,
                     speed: 1.5 // Gives it a nice tactical swoop
                 });
@@ -93,6 +96,11 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                         .setLngLat([lng, lat])
                         .addTo(mapInstance.current);
                 }
+
+                //Setup the Poi panel
+                setPoiPopup(false);
+                setMarkerData({ lat, lng });
+                setMarkerPopup(true);
             }
         }
     };
@@ -226,7 +234,8 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 </select>
             </div>
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
-            <SearchBar search={search} setSearch={setSearch} executeSearch={executeSearch} />
+            <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
+            <SearchBar search={search} setSearch={setSearch} executeSearch={executeSearch} poiOpen={poiPopup || markerPopup} />
         </div>
     )
 }
