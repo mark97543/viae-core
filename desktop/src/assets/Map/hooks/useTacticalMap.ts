@@ -67,12 +67,13 @@ export function useTacticalMap(
             })
 
             //POIs Logic
+            let poiLayers: string[] = [];
             map.on('load', () => {
                 if (!map) return;
 
                 // Find all layer IDs that belong to the 'poi' source-layer (which handles POI labels across different themes)
                 const style = map.getStyle();
-                const poiLayers = style.layers?.filter(layer => (layer as any)['source-layer'] === 'poi').map(layer => layer.id) || [];
+                poiLayers = style.layers?.filter(layer => (layer as any)['source-layer'] === 'poi').map(layer => layer.id) || [];
 
                 if (poiLayers.length > 0) {
                     //Change the cursor to a pointer when hovering over a native POI
@@ -96,7 +97,13 @@ export function useTacticalMap(
                         try {
                             const details = await invoke<any>('get_poi_details', { lat, lng })
                             console.log("Details:", details);
-                            searchMarker.current?.setLngLat([lng, lat]);
+                            if (searchMarker.current) {
+                                searchMarker.current.setLngLat([lng, lat]);
+                            } else {
+                                searchMarker.current = new Marker({ color: '#38bdf8' }) // Tactical cyan
+                                    .setLngLat([lng, lat])
+                                    .addTo(map!);
+                            }
                             setPoiData(details);
                         } catch (err) {
                             console.warn("Could not find full POI details in local DB:", err);
@@ -122,9 +129,26 @@ export function useTacticalMap(
                 if (searchMarker.current) {
                     searchMarker.current.setLngLat([lng, lat]);
                 } else {
-                    searchMarker.current = new Marker({ color: '#EF4444' }) // red-500
+                    searchMarker.current = new Marker({ color: '#38bdf8' }) // red-500
                         .setLngLat([lng, lat])
                         .addTo(map!);
+                }
+            })
+
+            //Left Click removes Marker
+            map.on('click', (e) => {
+
+                //Check if Clicked poi first
+                if (poiLayers && poiLayers.length > 0) {
+                    const features = map!.queryRenderedFeatures(e.point, { layers: poiLayers });
+                    if (features.length > 0) return; // Stop here! It's a POI.
+                }
+
+                if (searchMarker.current) {
+                    searchMarker.current.remove();
+                    searchMarker.current = null;
+                    setMarkerPopup(false);
+                    setPoiPopup(false);
                 }
             })
 
