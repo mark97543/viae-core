@@ -45,8 +45,8 @@ export function useTacticalMap(
                 style: style,
                 center: [-98.583333, 39.833333], //Fallback
                 zoom: 14,
-                pitch: 55,       // Tilts the camera to show off the 3D buildings
-                bearing: -17.6   // Rotates the map slightly for a cinematic view
+                pitch: 0,       // Tilts the camera to show off the 3D buildings
+                bearing: 0   // Rotates the map slightly for a cinematic view
             });
             mapInstance.current = map;
 
@@ -96,6 +96,7 @@ export function useTacticalMap(
                         try {
                             const details = await invoke<any>('get_poi_details', { lat, lng })
                             console.log("Details:", details);
+                            searchMarker.current?.setLngLat([lng, lat]);
                             setPoiData(details);
                         } catch (err) {
                             console.warn("Could not find full POI details in local DB:", err);
@@ -107,6 +108,27 @@ export function useTacticalMap(
 
                 }
             })
+
+            //Add Right Click Context Menu
+            map.on('contextmenu', (e) => {
+                const { lng, lat } = e.lngLat;
+
+                //close the poi popup if open and open the sutom marker popup
+                setPoiPopup(false);
+                setMarkerData({ lng, lat });
+                setMarkerPopup(true);
+
+                //Drop the visual pin on the map
+                if (searchMarker.current) {
+                    searchMarker.current.setLngLat([lng, lat]);
+                } else {
+                    searchMarker.current = new Marker({ color: '#EF4444' }) // red-500
+                        .setLngLat([lng, lat])
+                        .addTo(map!);
+                }
+            })
+
+
 
         }).catch(err => {
             console.error("Failed to load theme:", err);
