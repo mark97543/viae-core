@@ -1,9 +1,22 @@
 import './POIPopup.css'
 import { useState } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { useWaypoints } from '../../../context/WaypointContext';
 
 const POIPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay: (value: boolean) => void, data: any }) => {
     const [copied, setCopied] = useState(false);
+    const { addWaypoint } = useWaypoints();
+
+    const handleAddWaypoint = () => {
+        if (!data?.lat || !data?.lng) return;
+        addWaypoint({
+            name: data.name || 'Unknown Location',
+            lat: data.lat,
+            lng: data.lng,
+            type: 'poi',
+            description: data.description,
+        });
+    };
 
     const handleCopy = () => {
         if (!data?.lat || !data?.lng) return;
@@ -85,6 +98,10 @@ const POIPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay:
                 )}
             </div>
 
+            <button className="poi-add-btn" onClick={handleAddWaypoint}>
+                <span>+</span> Add to Trip
+            </button>
+
             <div className="poi-footer">
                 {data?.lat && data?.lng ? (
                     <div className="poi-coords">
@@ -102,7 +119,7 @@ const POIPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay:
                         }} className="poi-gmaps-link">Open in Google Maps</a>
                     </div>
                 ) : <div />}
-                
+
                 <button className="poi-close-btn" onClick={() => setDisplay(false)}>Close</button>
             </div>
         </div>

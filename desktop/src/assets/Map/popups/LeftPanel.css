@@ -1,0 +1,178 @@
+.left-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 320px;
+    background-color: rgba(15, 15, 15, 0.75); /* Deep transparent dark */
+    backdrop-filter: blur(16px); /* Strong glassmorphism effect */
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08); /* Border on the right since it's on the left side */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    color: #f1f5f9;
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.6); /* Shadow pushes right */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.left-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+}
+
+.left-panel-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.left-panel-clear {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.left-panel-clear:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.left-panel-empty {
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    padding: 40px 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+.left-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar */
+.left-panel-content::-webkit-scrollbar {
+    width: 4px;
+}
+.left-panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.left-panel-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.waypoint-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    transition: all 0.2s ease;
+    border-left: 3px solid #38bdf8; /* Cyan tactical accent */
+}
+
+.waypoint-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(56, 189, 248, 0.3);
+    transform: translateX(4px);
+}
+
+.waypoint-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.waypoint-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.waypoint-card-remove {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.waypoint-card-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.waypoint-card-coords-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.waypoint-card-coords {
+    font-family: monospace;
+    font-size: 13px;
+    color: #cbd5e1;
+    margin: 0;
+}
+
+.left-panel-copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    font-size: 9px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.left-panel-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.waypoint-card-type {
+    display: inline-block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #7dd3fc;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 8px;
+}

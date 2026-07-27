@@ -133,6 +133,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
 
 - [ ] **Left Sidebar UI (Trip Organizer)**
   - [X] Create glassmorphic sliding panel on the left side of the screen.
+  - [X] BUG FIX: The cursor never changed to a pointer when hovering over a POI and when clicking on a POI or the map it would place a POI. 
   - [ ] Add "Add to Trip" button in the POIPopup and MarkerPopup.
   - [ ] Display a list of added POIs/Coordinates in the sidebar.
   - [ ] Implement drag-and-drop reordering for the list of stops.

@@ -22,6 +22,10 @@ const MarkerPopup = ({ display, setDisplay, data }: { display: boolean, setDispl
                     <h4>A user-defined marker on the map.</h4>
                 </div>
             </div>
+            
+            <button className="poi-add-btn">
+                <span>+</span> Add to Trip
+            </button>
 
             <div className="poi-footer">
                 {data?.lat && data?.lng ? (
