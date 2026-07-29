@@ -27,6 +27,14 @@ pub async fn get_poi_details(
     crate::maptiles::find_poi_by_coords(&app_handle, lat, lng)
 }
 
+#[tauri::command]
+pub async fn search_pois_by_category(
+    app_handle: tauri::AppHandle,
+    category: String,
+) -> Result<Vec<crate::maptiles::PoiDetail>, String> {
+    crate::maptiles::search_pois_by_category(&app_handle, &category)
+}
+
 //Save Trip
 #[tauri::command]
 pub fn save_trip_file(path: String, contents: String) -> Result<(), String> {

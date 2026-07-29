@@ -21,6 +21,7 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
 
     //Map Tools Menu
     let map_import = MenuItem::with_id(app, "mapimport", "Import", true, None::<&str>)?;
+    let range_finder = MenuItem::with_id(app, "range_finder", "Range Finder", true, None::<&str>)?;
     
 
     //Themes
@@ -36,7 +37,7 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
     let theme_10 = MenuItem::with_id(app, "positron", "Positron", true, None::<&str>)?;
     let theme_menu = Submenu::with_items(app, "Themes", true, &[&theme_1, &theme_2, &theme_3, &theme_4, &theme_5, &theme_6, &theme_7, &theme_8, &theme_9, &theme_10])?;
     
-    let map_menu = Submenu::with_items(app, "Map Tools", true, &[&map_import, &theme_menu])?;
+    let map_menu = Submenu::with_items(app, "Map Tools", true, &[&map_import, &range_finder, &theme_menu])?;
     //Assemble the Master Menu
     let main_menu = Menu::with_items(app, &[&file_menu, &map_menu])?;
 

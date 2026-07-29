@@ -38,6 +38,7 @@ pub fn run() {
             crate::commands::get_map_tile,
             crate::commands::get_map_metadata,
             crate::commands::get_poi_details,
+            crate::commands::search_pois_by_category,
             crate::commands::save_trip_file,
             crate::commands::load_trip_file,
             crate::routing::calculate_route,
@@ -58,6 +59,9 @@ pub fn run() {
                     "mapimport" => {
                         //Send the signal to the front end
                         let _ = app_handle.emit("navigate-to-view", "map-loader");
+                    }
+                    "range_finder" => {
+                        let _ = app_handle.emit("toggle-range-finder", ());
                     }
                     "newtrip" => {
                         //Send the signal to the front end

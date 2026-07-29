@@ -153,3 +153,38 @@ pub fn find_poi_by_coords(
 
     Ok(poi)
 }
+
+pub fn search_pois_by_category(
+    app_handle: &tauri::AppHandle,
+    category: &str,
+) -> Result<Vec<PoiDetail>, String> {
+    let app_dir = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
+    let db_path = app_dir.join("maps").join("geocoder.db");
+
+    let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+
+    let mut stmt = conn.prepare(
+        "SELECT id, name, category, lat, lng, rank, tags
+         FROM places 
+         WHERE category = ?1"
+    ).map_err(|e| e.to_string())?;
+
+    let poi_iter = stmt.query_map([category], |row| {
+        Ok(PoiDetail {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            category: row.get(2)?,
+            lat: row.get(3)?,
+            lng: row.get(4)?,
+            rank: row.get(5)?,
+            tags: row.get(6).unwrap_or(None),
+        })
+    }).map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    for poi in poi_iter {
+        results.push(poi.map_err(|e| e.to_string())?);
+    }
+    
+    Ok(results)
+}

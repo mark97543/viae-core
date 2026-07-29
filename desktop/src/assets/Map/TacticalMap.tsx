@@ -13,6 +13,7 @@ import { useWaypoints } from '../../context/WaypointContext';
 import LeftPanel from './popups/LeftPanel';
 import EditPopup from './popups/EditPopup';
 import TitlePopup from './popups/TitlePopup';
+import RangeFinderTool from './popups/RangeFinderTool';
 
 // Initialize the map worker and custom mbtiles protocol globally
 setupMapLibre();
@@ -26,6 +27,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const [theme, setTheme] = useState('osm-bright');
     const [search, setSearch] = useState('');
     const [titlePopup, setTitlePopup] = useState(false);
+    const [rangeFinderOpen, setRangeFinderOpen] = useState(false);
 
     const { tripData, setTripData, waypoints } = useWaypoints();
 
@@ -113,10 +115,15 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             }
         };
 
+        const unlistenRangeFinder = listen('toggle-range-finder', () => {
+            setRangeFinderOpen(prev => !prev);
+        });
+
         window.addEventListener('trip-loaded', handleTripLoaded);
 
         return () => {
             unlisten.then(f => f());
+            unlistenRangeFinder.then(f => f());
             window.removeEventListener('trip-loaded', handleTripLoaded);
         };
     }, []);
@@ -136,6 +143,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
+            <RangeFinderTool display={rangeFinderOpen} setDisplay={setRangeFinderOpen} mapInstance={mapInstance} />
             <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup || titlePopup} />
             <LeftPanel
                 openEdit={(data) => {
