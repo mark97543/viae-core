@@ -10,6 +10,7 @@ import { THEMES, setupMapLibre } from './mapConfig';
 import { parseCoordinates } from './mapUtils';
 import { useTacticalMap } from './hooks/useTacticalMap';
 import LeftPanel from './popups/LeftPanel';
+import EditPopup from './popups/EditPopup';
 
 // Initialize the map worker and custom mbtiles protocol globally
 setupMapLibre();
@@ -29,7 +30,9 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         poiPopup, setPoiPopup,
         poiData,
         markerPopup, setMarkerPopup,
-        markerData, setMarkerData
+        markerData, setMarkerData,
+        editPopup, setEditPopup,
+        editData, setEditData
     } = useTacticalMap(mapContainer, activeMapFile, theme);
 
     // Fly to coordinates only when requested
@@ -56,6 +59,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
 
             //Setup the Poi panel
             setPoiPopup(false);
+            setEditPopup(false);
             setMarkerData(coords);
             setMarkerPopup(true);
         }
@@ -85,8 +89,14 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             </div>
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
-            <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup} />
-            <LeftPanel />
+            <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
+            <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup} />
+            <LeftPanel openEdit={(data) => {
+                setEditData(data);
+                setEditPopup(true);
+                setPoiPopup(false);
+                setMarkerPopup(false);
+            }} />
         </div>
     )
 }

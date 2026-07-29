@@ -2,7 +2,7 @@ import './LeftPanel.css'
 import { useState } from 'react'
 import { useWaypoints } from '../../../context/WaypointContext'
 
-const LeftPanel = () => {
+const LeftPanel = ({ openEdit }: { openEdit: (data: any) => void }) => {
     const { waypoints, removeWaypoint, clearWaypoints } = useWaypoints();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -21,7 +21,7 @@ const LeftPanel = () => {
             <div className="left-panel-content">
                 {waypoints.length === 0 ? (
                     <div className="left-panel-empty">
-                        Your tactical plan is empty.<br/><br/>Right-click the map or click a POI to add waypoints.
+                        Your tactical plan is empty.<br /><br />Right-click the map or click a POI to add waypoints.
                     </div>
                 ) : (
                     waypoints.map((point, index) => (
@@ -30,13 +30,22 @@ const LeftPanel = () => {
                                 <h3 className="waypoint-card-title">
                                     {index + 1}. {point.name || 'Custom Location'}
                                 </h3>
-                                <button 
-                                    className="waypoint-card-remove" 
-                                    onClick={() => removeWaypoint(point.id)}
-                                    title="Remove waypoint"
-                                >
-                                    &times;
-                                </button>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <button
+                                        className="waypoint-card-edit-btn"
+                                        onClick={() => openEdit(point)}
+                                        title="Edit waypoint"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="waypoint-card-remove"
+                                        onClick={() => removeWaypoint(point.id)}
+                                        title="Remove waypoint"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
                             </div>
                             <div className="waypoint-card-coords-row">
                                 <p className="waypoint-card-coords">

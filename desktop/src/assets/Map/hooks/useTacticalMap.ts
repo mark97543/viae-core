@@ -14,6 +14,8 @@ export function useTacticalMap(
     const [poiData, setPoiData] = useState<any>('');
     const [markerPopup, setMarkerPopup] = useState(false);
     const [markerData, setMarkerData] = useState<{ lat: number; lng: number } | null>(null);
+    const [editPopup, setEditPopup] = useState(false);
+    const [editData, setEditData] = useState<any>(null);
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -110,6 +112,7 @@ export function useTacticalMap(
                         }
 
                         setMarkerPopup(false);
+                        setEditPopup(false);
                         setPoiPopup(true);
                     })
 
@@ -122,6 +125,7 @@ export function useTacticalMap(
 
                 //close the poi popup if open and open the sutom marker popup
                 setPoiPopup(false);
+                setEditPopup(false);
                 setMarkerData({ lng, lat });
                 setMarkerPopup(true);
 
@@ -149,6 +153,7 @@ export function useTacticalMap(
                     searchMarker.current = null;
                     setMarkerPopup(false);
                     setPoiPopup(false);
+                    setEditPopup(false);
                 }
             })
 
@@ -172,6 +177,8 @@ export function useTacticalMap(
         poiPopup, setPoiPopup,
         poiData, setPoiData,
         markerPopup, setMarkerPopup,
-        markerData, setMarkerData
+        markerData, setMarkerData,
+        editPopup, setEditPopup,
+        editData, setEditData
     };
 }
