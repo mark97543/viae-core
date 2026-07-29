@@ -1,5 +1,5 @@
 import './LeftPanel.css'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useWaypoints, Waypoint } from '../../../context/WaypointContext'
 import {
     DndContext,
@@ -25,7 +25,6 @@ const SortableWaypointCard = ({
     flyToWaypoint, 
     handleCopy, 
     copiedId,
-    removeWaypoint
 }: { 
     point: Waypoint; 
     index: number;
@@ -33,7 +32,6 @@ const SortableWaypointCard = ({
     flyToWaypoint: (lat: number, lng: number) => void;
     handleCopy: (id: string, lat: number, lng: number) => void;
     copiedId: string | null;
-    removeWaypoint: (id: string) => void;
 }) => {
     const {
         attributes,
@@ -93,7 +91,9 @@ const SortableWaypointCard = ({
                     }}
                     title="Edit waypoint details"
                 >
-                    &gt;
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -109,7 +109,7 @@ const LeftPanel = ({
     openTripSettings: () => void,
     flyToWaypoint: (lat: number, lng: number) => void
 }) => {
-    const { waypoints, removeWaypoint, tripData, reorderWaypoints } = useWaypoints();
+    const { waypoints, tripData, reorderWaypoints, routeData } = useWaypoints();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const sensors = useSensors(
@@ -144,6 +144,17 @@ const LeftPanel = ({
                 <h1 className="trip-title-clickable" title="Edit Trip Settings" onClick={openTripSettings}>
                     {tripData?.name}
                 </h1>
+                {routeData && (
+                    <div className="trip-stats">
+                        <span title="Total Distance">
+                            {routeData.distance.toFixed(1)} mi
+                        </span>
+                        <span className="trip-stats-divider">•</span>
+                        <span title="Estimated Time">
+                            {Math.round(routeData.duration / 60)} min
+                        </span>
+                    </div>
+                )}
             </div>
 
             <div className="left-panel-content">
@@ -170,7 +181,6 @@ const LeftPanel = ({
                                     flyToWaypoint={flyToWaypoint}
                                     handleCopy={handleCopy}
                                     copiedId={copiedId}
-                                    removeWaypoint={removeWaypoint}
                                 />
                             ))}
                         </SortableContext>

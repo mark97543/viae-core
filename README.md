@@ -19,7 +19,7 @@
 
 To achieve absolute off-grid sovereignty, Iter Viae implements a **100% Air-Gapped, Cell-Phone-Centric Master Architecture**:
 
-- **The Master Mobile Device (The Standalone Workstation & Head Unit):** Built around rugged, budget-friendly Android hardware (such as the Moto G Play 2024 featuring a 5,000 mAh battery) equipped with high-capacity MicroSD expansion (supporting up to 256GB/512GB). The phone acts as the complete master filesystem holding a massive 100 GB multi-state map vault (vector tiles and Valhalla routing graphs).
+- **The Master Mobile Device (The Standalone Workstation & Head Unit):** Built around rugged, budget-friendly Android hardware (such as the Moto G Play 2024 featuring a 5,000 mAh battery) equipped with high-capacity MicroSD expansion (supporting up to 256GB/512GB). The phone acts as the complete master filesystem holding a massive 100 GB multi-state map vault (vector tiles and 3-Tier Native SQLite routing chunks).
 - **Total Air-Gapped Isolation:** The device operates permanently in Airplane Mode with cellular radios deactivated. It relies exclusively on standalone GPS/GNSS hardware for live tracking, eliminating any risk of carrier pings or telemetry leaks.
 - **Cross-Platform Planning & Mirroring Workspace (Windows & Linux):** To bypass the ergonomic limits of planning complex routes on a 6.5-inch mobile screen, the mobile device interfaces locally with a cross-platform desktop wrapper (built on Tauri + React + Vite, supporting both Windows and Linux). Using embedded tools like `scrcpy` (Screen Copy) bundled via sidecar binaries, riders can comfortably manage their map vaults, plot waypoints, and execute layouts using a full keyboard and mouse workspace while all processing and storage remain 100% local to the phone.
 
@@ -38,7 +38,7 @@ To achieve absolute off-grid sovereignty, Iter Viae implements a **100% Air-Gapp
 ### Mobile
 - **Ruggedized Off-Grid Hardware Target:** Designed for budget-friendly, durable Android devices (such as the Motorola Moto G Play) equipped with high-capacity MicroSD card expansion.
 - **100% Air-Gapped Operation:** Operates permanently in Airplane Mode with cellular radios disabled. Navigation relies exclusively on standalone GPS/GNSS hardware.
-- **Massive Regional Storage:** Utilizes local MicroSD storage paths to read a multi-gigabyte map library (vector tiles and Valhalla routing graphs) without cloud streaming dependencies.
+- **Massive Regional Storage:** Utilizes local MicroSD storage paths to read a multi-gigabyte map library (vector tiles and 3-Tier Native routing chunks) without cloud streaming dependencies.
 - **Tactical High-Contrast Display:** Features optimized map themes and low-latency rendering designed for optimal daylight visibility and high-speed legibility on motorcycle handlebars.
 
 ### Desktop
@@ -48,7 +48,7 @@ To achieve absolute off-grid sovereignty, Iter Viae implements a **100% Air-Gapp
 
 ### Tools
 - **Custom Map Compilation Scripts (Bash / Python Pipeline):** 
-  - **Phase 1 (Current Tooling):** Robust local shell scripts that automate parsing raw OpenStreetMap (`.osm.pbf`) data, executing tile generators (like Planetiler), and building custom `.mbtiles` and routing graph tarballs.
+  - **Phase 1 (Current Tooling):** Robust local shell scripts that automate parsing raw OpenStreetMap (`.osm.pbf`) data, executing tile generators (like Planetiler), and compiling the Native Rust 3-Tier spatial map database.
   - **Phase 2 (Tauri Integration):** Migrating these compilation wrappers into native Rust backend tasks so the desktop app can manage map-building directly through a clean graphical interface.
 - **The Mission Manifest (Print Mode):** A zero-overhead CSS-driven print layout that converts complex multi-stop route trees into a clean, paper-ready physical roadbook format for analog cockpit backup.
 
@@ -100,7 +100,7 @@ This version will focus on templating the file structure and basic functionality
 - [X] Process maps and save new ones to folder. 
 - [X] Move file temp basis to work with it
 - [X] Build mbtile File
-- [X] Build routing.tar
+- [X] Build Native 3-Tier SQLite Routing Engine
 - [X] Build gazetteer.db
 - [X] Set up delete function when starting process 
 - [X] Set up statuser for this whole thing to let the uiser know we are working. 
@@ -146,10 +146,10 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Add Save/Load functionality to persist the tactical plan to a local file.
   - [X] Added "New Trip" feature via Tauri native menu, including a native warning dialog to safely clear the plan.
   - [X] Added dynamic map swooping (flyTo) when clicking waypoint cards or the edit button in the sidebar.
-- [ ] **Routing & Pathfinding**
-  - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
-  - [ ] Calculate routes between the ordered points in the Trip list.
-  - [ ] Draw route polylines on the MapLibre map layer.
+- [X] **Routing & Pathfinding**
+  - [X] Integrate Native Rust 3-Tier Spatial Chunking Routing engine.
+  - [X] Calculate routes between the ordered points in the Trip list.
+  - [X] Draw route polylines on the MapLibre map layer via GeoJSON.
   - [ ] Add the time and distance to the left bar
 - [ ] **Draggable Waypoints**
   - [ ] Render intermediate route waypoints on the map.

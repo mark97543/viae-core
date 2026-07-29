@@ -112,9 +112,9 @@ pub async fn import_map_file(app_handle:AppHandle, file_path:String)->Result<Str
         println!("[Iter Viae Gazetteer] Warning: Failed to build gazetteer: {}", e);
     }
 
-    // Build Routing Placeholder
-    if let Err(e) = build_routing_placeholder(&file_name_str, &maps_dir) {
-        println!("[Iter Viae Routing] Warning: Failed to build routing placeholder: {}", e);
+    // Build Native Hierarchical Routing Graph
+    if let Err(e) = crate::routing_builder::build_hierarchical_graph(&app_handle, &destination_path, &maps_dir, &file_name_str) {
+        println!("[Iter Viae Routing] Warning: Failed to build routing graph: {}", e);
     }
 
     Ok(format!("Successfully built full map assets to: {:?}", maps_dir))
@@ -175,12 +175,5 @@ fn build_gazetteer(app_handle: &AppHandle, pbf_path: &Path, output_dir: &Path) -
     let _ = app_handle.emit("gazetteer-progress", format!("Finished! Indexed {} POIs.", count));
     println!("[Iter Viae Gazetteer] Native search index compiled with {} places.", count);
 
-    Ok(())
-}
-
-fn build_routing_placeholder(file_name: &str, output_dir: &Path) -> Result<(), String> {
-    println!("[Iter Viae Routing] Generating native routing placeholder...");
-    let routing_path = output_dir.join(format!("{}_routing.tar", file_name));
-    fs::write(&routing_path, b"ITER_VIAE_ROUTING_GRAPH_PLACEHOLDER_V1").map_err(|e| e.to_string())?;
     Ok(())
 }

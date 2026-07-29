@@ -11,7 +11,7 @@ export function useTacticalMap(
     const mapInstance = useRef<Map | null>(null);
     const searchMarker = useRef<Marker | null>(null);
     const waypointMarkers = useRef<Marker[]>([]);
-    const { waypoints } = useWaypoints();
+    const { waypoints, routeData } = useWaypoints();
 
     const [isMapReady, setIsMapReady] = useState(false);
     const [poiPopup, setPoiPopup] = useState(false);
@@ -71,7 +71,12 @@ export function useTacticalMap(
                         })
                     }
                 }
-            })
+            });
+
+            // Arm the Native 3-Tier Routing Engine!
+            invoke<string>('load_routing_graph').then((res) => {
+                console.log(res);
+            }).catch(err => console.error(err));
 
             //POIs Logic
             let poiLayers: string[] = [];
@@ -193,6 +198,70 @@ export function useTacticalMap(
             waypointMarkers.current.push(el);
         });
     }, [waypoints, isMapReady]);
+
+    // Sync route data to map layer
+    useEffect(() => {
+        if (!isMapReady || !mapInstance.current) return;
+        const map = mapInstance.current;
+
+        const sourceId = 'tactical-route-source';
+        const layerId = 'tactical-route-layer';
+        const glowLayerId = 'tactical-route-glow';
+
+        // Add source if not exists
+        if (!map.getSource(sourceId)) {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                }
+            });
+
+            // Add glow layer (wider, lower opacity)
+            map.addLayer({
+                id: glowLayerId,
+                type: 'line',
+                source: sourceId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#38bdf8', // Tactical cyan
+                    'line-width': 8,
+                    'line-opacity': 0.3
+                }
+            });
+
+            // Add inner line layer
+            map.addLayer({
+                id: layerId,
+                type: 'line',
+                source: sourceId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#38bdf8',
+                    'line-width': 3,
+                    'line-opacity': 1.0
+                }
+            });
+        }
+
+        const source: any = map.getSource(sourceId);
+        if (routeData && routeData.geometry) {
+            source.setData(routeData.geometry);
+        } else {
+            // Clear route
+            source.setData({
+                type: 'FeatureCollection',
+                features: []
+            });
+        }
+    }, [routeData, isMapReady]);
 
     return {
         mapInstance,

@@ -2,8 +2,12 @@ mod menu;
 mod tool;
 mod commands;
 mod maptiles;
+mod routing_builder;
+mod routing;
 use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
+use std::sync::Mutex;
+use crate::routing::{RoutingGraph, RoutingState};
 
 
 #[tauri::command]
@@ -20,6 +24,10 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        .manage(RoutingState {
+            basemap: Mutex::new(None),
+            db_path: Mutex::new(None),
+        })
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -31,7 +39,9 @@ pub fn run() {
             crate::commands::get_map_metadata,
             crate::commands::get_poi_details,
             crate::commands::save_trip_file,
-            crate::commands::load_trip_file
+            crate::commands::load_trip_file,
+            crate::routing::calculate_route,
+            crate::routing::load_routing_graph
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file
@@ -39,7 +49,7 @@ pub fn run() {
             app.set_menu(menu)?;
 
             //Listen for the menu item clickcs
-            app.on_menu_event(|app_handle, event| {
+            app.on_menu_event(move |app_handle, event| {
                 let id = event.id().as_ref();
                 match id {
                     "quit" => {
