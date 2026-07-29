@@ -131,11 +131,13 @@ const SortableWaypointCard = ({
 const LeftPanel = ({ 
     openEdit, 
     openTripSettings, 
-    flyToWaypoint 
+    flyToWaypoint,
+    zoomToTrip
 }: { 
-    openEdit: (data: Waypoint) => void, 
-    openTripSettings: () => void,
-    flyToWaypoint: (lat: number, lng: number) => void
+    openEdit: (data: Waypoint) => void;
+    openTripSettings: () => void;
+    flyToWaypoint: (lat: number, lng: number) => void;
+    zoomToTrip: () => void;
 }) => {
     const { waypoints, tripData, reorderWaypoints, routeData } = useWaypoints();
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -212,9 +214,34 @@ const LeftPanel = ({
     return (
         <div className="left-panel">
             <div className="left-panel-header">
-                <h1 className="trip-title-clickable" title="Edit Trip Settings" onClick={openTripSettings}>
-                    {tripData?.name}
-                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <h1 className="trip-title-clickable" title="Edit Trip Settings" onClick={openTripSettings}>
+                        {tripData?.name}
+                    </h1>
+                    {waypoints.length > 0 && (
+                        <button 
+                            onClick={zoomToTrip}
+                            title="Zoom to fit entire trip"
+                            style={{ 
+                                background: 'transparent', 
+                                border: 'none', 
+                                color: '#38bdf8', 
+                                cursor: 'pointer',
+                                padding: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M15 3h6v6"></path>
+                                <path d="M9 21H3v-6"></path>
+                                <path d="M21 3l-7 7"></path>
+                                <path d="M3 21l7-7"></path>
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="left-panel-content">

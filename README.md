@@ -164,14 +164,16 @@ This we will be adding points to a left bar to organize poi,s in order then rout
 - [X] **Trip Stats**
   - [X] Add stats to the trip
   - [X] Add stats to the map
+  - [X] Calculate ETA Arrival/Departure timeline with Waypoint Break Durations
 
 - [ ] **Route Printing**
 - [ ] **Route Budget**
 - [ ] **Misc**
-  - [ ] When a trip is loaded zomm into it
-  - [ ] Trip overview to zoom out see whole trip 
+  - [X] When a trip is loaded zomm into it
+  - [X] Trip overview to zoom out see whole trip 
   - [X] Modify the waypoint buttons to thin out the div and have a cleaner look.
   - [ ] Multiday Routes 
+  - [ ] Route Budget
 
 
 

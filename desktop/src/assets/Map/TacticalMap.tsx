@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Marker } from 'maplibre-gl';
+import { Marker, LngLatBounds } from 'maplibre-gl';
 import { listen } from '@tauri-apps/api/event';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './TacticalMap.css';
@@ -26,8 +26,8 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const [theme, setTheme] = useState('osm-bright');
     const [search, setSearch] = useState('');
     const [titlePopup, setTitlePopup] = useState(false);
-    
-    const { tripData, setTripData } = useWaypoints();
+
+    const { tripData, setTripData, waypoints } = useWaypoints();
 
     const {
         mapInstance,
@@ -46,6 +46,25 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 center: [lng, lat],
                 zoom: 16,
                 speed: 1.5 // Nice tactical swoop
+            });
+        }
+    };
+
+    const zoomToTrip = (points = waypoints) => {
+        if (mapInstance.current && points && points.length > 0) {
+            const bounds = new LngLatBounds();
+            // Need at least one point to initialize properly in some MapLibre versions
+            if (points.length > 0) {
+                bounds.extend([points[0].lng, points[0].lat]);
+            }
+            points.forEach((wp: any) => {
+                bounds.extend([wp.lng, wp.lat]);
+            });
+            
+            mapInstance.current.fitBounds(bounds, {
+                padding: { top: 80, bottom: 80, left: 400, right: 80 }, // Account for LeftPanel width!
+                maxZoom: 15,
+                speed: 1.2
             });
         }
     };
@@ -85,8 +104,20 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             setTheme(event.payload);
         });
 
+        const handleTripLoaded = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const loadedWaypoints = customEvent.detail;
+            
+            if (mapInstance.current && loadedWaypoints && loadedWaypoints.length > 0) {
+                zoomToTrip(loadedWaypoints);
+            }
+        };
+
+        window.addEventListener('trip-loaded', handleTripLoaded);
+
         return () => {
             unlisten.then(f => f());
+            window.removeEventListener('trip-loaded', handleTripLoaded);
         };
     }, []);
 
@@ -106,7 +137,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
             <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup || titlePopup} />
-            <LeftPanel 
+            <LeftPanel
                 openEdit={(data) => {
                     setEditData(data);
                     setEditPopup(true);
@@ -114,7 +145,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     setMarkerPopup(false);
                     setTitlePopup(false);
                     flyToWaypoint(data.lat, data.lng);
-                }} 
+                }}
                 openTripSettings={() => {
                     setTitlePopup(true);
                     setPoiPopup(false);
@@ -122,6 +153,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     setEditPopup(false);
                 }}
                 flyToWaypoint={flyToWaypoint}
+                zoomToTrip={() => zoomToTrip(waypoints)}
             />
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
         </div>

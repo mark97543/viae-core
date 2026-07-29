@@ -252,6 +252,10 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                         setTripData(parsedData.tripData);
                         setWaypoints(parsedData.waypoints);
                         setCurrentFilePath(filePath);
+                        // Let map know to zoom in
+                        setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('trip-loaded', { detail: parsedData.waypoints }));
+                        }, 100);
                     } else {
                         alert("Error: The selected JSON file is not a valid Trip format.");
                     }
