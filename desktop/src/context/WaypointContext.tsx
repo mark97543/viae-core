@@ -12,6 +12,7 @@ export interface Waypoint {
 interface WaypointContextType {
     waypoints: Waypoint[];
     addWaypoint: (waypoint: Omit<Waypoint, 'id'>) => void;
+    editWaypoint: (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => void;
     removeWaypoint: (id: string) => void;
     clearWaypoints: () => void;
 }
@@ -29,6 +30,12 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
         setWaypoints((prev) => [...prev, newWaypoint]);
     };
 
+    const editWaypoint = (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => {
+        setWaypoints((prev) => 
+            prev.map((wp) => wp.id === id ? { ...wp, ...updatedData } : wp)
+        );
+    };
+
     const removeWaypoint = (id: string) => {
         setWaypoints((prev) => prev.filter((wp) => wp.id !== id));
     };
@@ -38,7 +45,7 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <WaypointContext.Provider value={{ waypoints, addWaypoint, removeWaypoint, clearWaypoints }}>
+        <WaypointContext.Provider value={{ waypoints, addWaypoint, editWaypoint, removeWaypoint, clearWaypoints }}>
             {children}
         </WaypointContext.Provider>
     );

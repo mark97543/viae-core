@@ -134,9 +134,14 @@ This we will be adding points to a left bar to organize poi,s in order then rout
 - [ ] **Left Sidebar UI (Trip Organizer)**
   - [X] Create glassmorphic sliding panel on the left side of the screen.
   - [X] BUG FIX: The cursor never changed to a pointer when hovering over a POI and when clicking on a POI or the map it would place a POI. 
-  - [ ] Add "Add to Trip" button in the POIPopup and MarkerPopup.
-  - [ ] Display a list of added POIs/Coordinates in the sidebar.
+  - [X] Add "Add to Trip" button in the POIPopup and MarkerPopup.
+  - [X] Display a list of added POIs/Coordinates in the sidebar.
+  - [X] Built a global `WaypointContext` to manage waypoint state.
+  - [X] Created the `EditPopup` template and wired it up with exclusive popup logic (only one right panel open at a time).
+  - [X] Synced `WaypointContext` with MapLibre so that persistent red markers are drawn for all stops.
   - [ ] Implement drag-and-drop reordering for the list of stops.
+  - [ ] Implement the actual editing logic inside the `EditPopup` (changing names/descriptions).
+  - [ ] Add Save/Load functionality to persist the tactical plan to a local file.
 - [ ] **Routing & Pathfinding**
   - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
   - [ ] Calculate routes between the ordered points in the Trip list.

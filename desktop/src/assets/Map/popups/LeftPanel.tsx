@@ -1,8 +1,8 @@
 import './LeftPanel.css'
 import { useState } from 'react'
-import { useWaypoints } from '../../../context/WaypointContext'
+import { useWaypoints, Waypoint } from '../../../context/WaypointContext'
 
-const LeftPanel = ({ openEdit }: { openEdit: (data: any) => void }) => {
+const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
     const { waypoints, removeWaypoint, clearWaypoints } = useWaypoints();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
