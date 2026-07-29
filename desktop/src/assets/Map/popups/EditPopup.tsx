@@ -8,18 +8,22 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
     // Local state for the form fields so we can Cancel without saving
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [breakHours, setBreakHours] = useState(0);
+    const [breakMinutes, setBreakMinutes] = useState(0);
 
     // Sync local state when a new waypoint is opened
     useEffect(() => {
         if (data) {
             setName(data.name || '');
             setDescription(data.description || '');
+            setBreakHours(data.breakHours || 0);
+            setBreakMinutes(data.breakMinutes || 0);
         }
     }, [data, display]);
 
     const handleSave = () => {
         if (data) {
-            editWaypoint(data.id, { name, description });
+            editWaypoint(data.id, { name, description, breakHours, breakMinutes });
         }
         setDisplay(false);
     };
@@ -45,6 +49,36 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter a custom name..."
                     />
+                </div>
+
+                <div className="poi-section" style={{ marginTop: '16px' }}>
+                    <label className="edit-form-label">Break Duration</label>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input
+                                className="edit-form-input"
+                                type="number"
+                                min="0"
+                                max="72"
+                                value={breakHours}
+                                onChange={(e) => setBreakHours(parseInt(e.target.value) || 0)}
+                                style={{ width: '100%' }}
+                            />
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>hr</span>
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input
+                                className="edit-form-input"
+                                type="number"
+                                min="0"
+                                max="59"
+                                value={breakMinutes}
+                                onChange={(e) => setBreakMinutes(parseInt(e.target.value) || 0)}
+                                style={{ width: '100%' }}
+                            />
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>min</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="poi-section" style={{ marginTop: '16px' }}>

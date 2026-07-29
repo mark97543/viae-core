@@ -151,19 +151,19 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Calculate routes between the ordered points in the Trip list.
   - [X] Draw route polylines on the MapLibre map layer via GeoJSON.
   - [X] Add the time and distance to the left bar
-- [ ] **Draggable Waypoints**
-  - [ ] Render intermediate route waypoints on the map.
-  - [ ] Allow user to click and drag waypoints to alter the route.
-  - [ ] Dynamically recalculate and redraw the route on drag release.
+- [X] **Draggable Waypoints**
+  - [X] Render intermediate route waypoints on the map.
+  - [X] Allow user to click and drag waypoints to alter the route.
+  - [X] Dynamically recalculate and redraw the route on drag release.
 - [ ] **Help Menu**
   - [ ] Add Hot Keys and Hotkey menus to show the hotkeys
   - [ ] Add Loading Map help or help wiki 
   - [ ] Add point and edit details
   - [ ] Add Routing Intructions and dragging
 
-- [ ] **Trip Stats**
-  - [ ] Add stats to the trip
-  - [ ] Add stats to the map
+- [X] **Trip Stats**
+  - [X] Add stats to the trip
+  - [X] Add stats to the map
 
 - [ ] **Route Printing**
 - [ ] **Route Budget**

@@ -33,6 +33,7 @@ const SortableWaypointCard = ({
     flyToWaypoint, 
     handleCopy, 
     copiedId,
+    timelineData
 }: { 
     point: Waypoint; 
     index: number;
@@ -40,6 +41,7 @@ const SortableWaypointCard = ({
     flyToWaypoint: (lat: number, lng: number) => void;
     handleCopy: (id: string, lat: number, lng: number) => void;
     copiedId: string | null;
+    timelineData?: { arrival?: Date, departure: Date };
 }) => {
     const {
         attributes,
@@ -63,34 +65,52 @@ const SortableWaypointCard = ({
             <div 
                 className={`waypoint-card ${isDragging ? 'dragging' : ''}`}
                 onClick={() => flyToWaypoint(point.lat, point.lng)}
-                style={{ cursor: 'pointer' }}
             >
-                <div 
-                    className="waypoint-drag-handle"
-                    {...attributes}
-                    {...listeners}
-                >
-                    {index + 1}
-                </div>
-                <div className="waypoint-card-content">
-                    <div className="waypoint-card-header">
-                        <h3 className="waypoint-card-title">
-                            {point.name || 'Custom Location'}
-                        </h3>
-                    </div>
-                    <div className="waypoint-card-coords-row">
-                        <p
-                            className="waypoint-card-coords"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleCopy(point.id, point.lat, point.lng);
-                            }}
-                            title="Click to copy coordinates"
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="waypoint-card-top-row">
+                        <div 
+                            className="waypoint-drag-handle"
+                            {...attributes}
+                            {...listeners}
                         >
-                            {copiedId === point.id ? "Copied!" : `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`}
-                        </p>
+                            {index + 1}
+                        </div>
+                        <div className="waypoint-card-content">
+                            <div className="waypoint-card-header">
+                                <h3 className="waypoint-card-title">
+                                    {point.name || 'Custom Location'}
+                                </h3>
+                            </div>
+                            <div className="waypoint-card-coords-row">
+                                <p
+                                    className="waypoint-card-coords"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopy(point.id, point.lat, point.lng);
+                                    }}
+                                    title="Click to copy coordinates"
+                                >
+                                    {copiedId === point.id ? "Copied!" : `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`}
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                    
+                    {timelineData && (
+                        <div className="waypoint-card-times-footer">
+                            {timelineData.arrival && (
+                                <span title="Arrival Time" className="waypoint-time arrival">
+                                    ARR: {timelineData.arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            )}
+                            {timelineData.arrival && <span className="waypoint-time-divider">•</span>}
+                            <span title="Departure Time" className="waypoint-time departure">
+                                DEP: {timelineData.departure.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                    )}
                 </div>
+
                 <button
                     className="waypoint-card-edit-btn"
                     onClick={(e) => {
@@ -146,23 +166,55 @@ const LeftPanel = ({
         setTimeout(() => setCopiedId(null), 2000);
     };
 
+    // Calculate arrival and departure times based on routeData and break times
+    const calculateTimeline = () => {
+        const timeline: { arrival?: Date, departure: Date }[] = [];
+        
+        let currentTime = new Date();
+        if (tripData?.startDate && tripData?.startTime) {
+            currentTime = new Date(`${tripData.startDate}T${tripData.startTime}`);
+        } else if (tripData?.startDate) {
+            currentTime = new Date(`${tripData.startDate}T08:00`);
+        } else if (tripData?.startTime) {
+            const today = new Date().toISOString().split('T')[0];
+            currentTime = new Date(`${today}T${tripData.startTime}`);
+        } else {
+            currentTime.setHours(8, 0, 0, 0); // Default to 8:00 AM today
+        }
+
+        for (let i = 0; i < waypoints.length; i++) {
+            const wp = waypoints[i];
+            
+            let arrival: Date | undefined = undefined;
+            
+            // If not the first point, we add the travel time from the PREVIOUS leg
+            if (i > 0 && routeData?.legs && routeData.legs[i - 1]) {
+                currentTime = new Date(currentTime.getTime() + routeData.legs[i - 1].duration * 1000);
+                arrival = new Date(currentTime);
+            }
+
+            // Add break time
+            const breakMins = (wp.breakHours || 0) * 60 + (wp.breakMinutes || 0);
+            if (breakMins > 0 || i === 0) {
+                // Point 0 departure is also shifted if it has a break time 
+                currentTime = new Date(currentTime.getTime() + breakMins * 60000);
+            }
+            
+            const departure = new Date(currentTime);
+            timeline.push({ arrival, departure });
+        }
+        
+        return timeline;
+    };
+
+    const timeline = calculateTimeline();
+
     return (
         <div className="left-panel">
             <div className="left-panel-header">
                 <h1 className="trip-title-clickable" title="Edit Trip Settings" onClick={openTripSettings}>
                     {tripData?.name}
                 </h1>
-                {routeData && (
-                    <div className="trip-stats">
-                        <span title="Total Distance">
-                            {routeData.distance.toFixed(1)} mi
-                        </span>
-                        <span className="trip-stats-divider">•</span>
-                        <span title="Estimated Time">
-                            {formatDuration(routeData.duration)}
-                        </span>
-                    </div>
-                )}
             </div>
 
             <div className="left-panel-content">
@@ -189,6 +241,7 @@ const LeftPanel = ({
                                         flyToWaypoint={flyToWaypoint}
                                         handleCopy={handleCopy}
                                         copiedId={copiedId}
+                                        timelineData={timeline[index]}
                                     />
                                     {routeData?.legs && routeData.legs[index] && index < waypoints.length - 1 && (
                                         <div className="waypoint-leg-connector">
@@ -210,6 +263,20 @@ const LeftPanel = ({
                     </DndContext>
                 )}
             </div>
+
+            {routeData && (
+                <div className="left-panel-footer">
+                    <div className="trip-stats">
+                        <span title="Total Distance">
+                            {routeData.distance.toFixed(1)} mi
+                        </span>
+                        <span className="trip-stats-divider">•</span>
+                        <span title="Estimated Time">
+                            {formatDuration(routeData.duration)}
+                        </span>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

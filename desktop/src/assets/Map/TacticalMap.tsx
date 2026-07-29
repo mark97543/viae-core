@@ -105,7 +105,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
-            <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup} />
+            <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup || titlePopup} />
             <LeftPanel 
                 openEdit={(data) => {
                     setEditData(data);

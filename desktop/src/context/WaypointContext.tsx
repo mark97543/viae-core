@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { confirm, save, open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { appDataDir, join } from '@tauri-apps/api/path';
-import { decodePolyline6 } from '../assets/Map/mapUtils';
 
 export interface Waypoint {
     id: string;
@@ -12,6 +11,8 @@ export interface Waypoint {
     lng: number;
     type?: 'marker' | 'poi';
     description?: string;
+    breakHours?: number;
+    breakMinutes?: number;
 }
 
 export interface RouteLeg {
@@ -43,6 +44,8 @@ interface WaypointContextType {
 export interface Trip {
     name: string;
     description?: string;
+    startDate?: string;
+    startTime?: string;
 }
 
 const WaypointContext = createContext<WaypointContextType | undefined>(undefined);
@@ -51,7 +54,9 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
     const [tripData, setTripData] = useState<Trip | null>({
         name: 'New Trip',
-        description: ''
+        description: '',
+        startDate: '',
+        startTime: ''
     });
     const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
     const [routeData, setRouteData] = useState<RouteData | null>(null);

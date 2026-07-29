@@ -11,7 +11,7 @@ export function useTacticalMap(
     const mapInstance = useRef<Map | null>(null);
     const searchMarker = useRef<Marker | null>(null);
     const waypointMarkers = useRef<Marker[]>([]);
-    const { waypoints, routeData } = useWaypoints();
+    const { waypoints, routeData, editWaypoint } = useWaypoints();
 
     const [isMapReady, setIsMapReady] = useState(false);
     const [poiPopup, setPoiPopup] = useState(false);
@@ -192,12 +192,18 @@ export function useTacticalMap(
 
         // Draw new red markers for waypoints
         waypoints.forEach(wp => {
-            const el = new Marker({ color: '#ef4444' }) // Red marker
+            const el = new Marker({ color: '#ef4444', draggable: true }) // Red marker, draggable!
                 .setLngLat([wp.lng, wp.lat])
                 .addTo(map);
+                
+            el.on('dragend', () => {
+                const lngLat = el.getLngLat();
+                editWaypoint(wp.id, { lat: lngLat.lat, lng: lngLat.lng });
+            });
+
             waypointMarkers.current.push(el);
         });
-    }, [waypoints, isMapReady]);
+    }, [waypoints, isMapReady, editWaypoint]);
 
     // Sync route data to map layer
     useEffect(() => {

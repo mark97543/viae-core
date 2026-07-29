@@ -36,6 +36,15 @@
     text-transform: uppercase;
 }
 
+.left-panel-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
 .trip-title-clickable {
     cursor: pointer;
     transition: color 0.2s ease;
@@ -122,14 +131,22 @@
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 6px;
-    padding: 0 0 0 14px;
     position: relative;
     transition: all 0.2s ease;
     border-left: 3px solid #38bdf8;
+    overflow: hidden; /* Ensures flush child backgrounds don't bleed out of rounded corners */
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    cursor: pointer;
+}
+
+.waypoint-card-top-row {
     display: flex;
     align-items: stretch;
     gap: 10px;
-    overflow: hidden; /* Ensures flush child backgrounds don't bleed out of rounded corners */
+    padding: 0 0 0 14px;
+    width: 100%;
 }
 
 .waypoint-card:hover {
@@ -217,12 +234,13 @@
 .waypoint-card-coords-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     margin: 0;
 }
 
 .waypoint-card-coords {
     font-family: monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: #cbd5e1;
     margin: 0;
     cursor: pointer;
@@ -231,6 +249,31 @@
 
 .waypoint-card-coords:hover {
     color: #38bdf8;
+}
+
+.waypoint-card-times-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 4px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.waypoint-time.arrival {
+    color: #34d399; /* emerald-400 */
+}
+
+.waypoint-time.departure {
+    color: #f87171; /* red-400 */
+}
+
+.waypoint-time-divider {
+    color: rgba(255, 255, 255, 0.2);
 }
 
 .waypoint-leg-connector {
@@ -279,4 +322,12 @@
 
 .leg-stats svg {
     color: #38bdf8;
+}
+
+.left-panel-footer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
 }
