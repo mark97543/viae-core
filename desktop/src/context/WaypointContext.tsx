@@ -67,11 +67,11 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
         setWaypoints((prev) => prev.filter((wp) => wp.id !== id));
     };
 
-    const reorderWaypoints = (startIndex: number, endIndex: number) => {
+    const reorderWaypoints = (oldIndex: number, newIndex: number) => {
         setWaypoints((prev) => {
             const result = Array.from(prev);
-            const [removed] = result.splice(startIndex, 1);
-            result.splice(endIndex, 0, removed);
+            const [removed] = result.splice(oldIndex, 1);
+            result.splice(newIndex, 0, removed);
             return result;
         });
     };

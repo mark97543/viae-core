@@ -142,7 +142,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Refined LeftPanel card UI (tactical styling, unified action bar, clickable coordinates).
   - [X] Implemented the actual editing logic inside the `EditPopup` (changing names/descriptions and saving to context).
   - [X] Built dynamic Trip Settings popup to customize the Trip Name and Summary.
-  - [X] Implement drag-and-drop reordering for the list of stops.
+  - [X] Implement drag-and-drop reordering for the list of stops (powered by `@dnd-kit` for buttery-smooth native animations).
   - [X] Add Save/Load functionality to persist the tactical plan to a local file.
   - [X] Added "New Trip" feature via Tauri native menu, including a native warning dialog to safely clear the plan.
   - [X] Added dynamic map swooping (flyTo) when clicking waypoint cards or the edit button in the sidebar.
@@ -150,6 +150,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
   - [ ] Calculate routes between the ordered points in the Trip list.
   - [ ] Draw route polylines on the MapLibre map layer.
+  - [ ] Add the time and distance to the left bar
 - [ ] **Draggable Waypoints**
   - [ ] Render intermediate route waypoints on the map.
   - [ ] Allow user to click and drag waypoints to alter the route.
@@ -166,6 +167,11 @@ This we will be adding points to a left bar to organize poi,s in order then rout
 
 - [ ] **Route Printing**
 - [ ] **Route Budget**
+- [ ] **Misc**
+  - [ ] When a trip is loaded zomm into it
+  - [ ] Trip overview to zoom out see whole trip 
+  - [X] Modify the waypoint buttons to thin out the div and have a cleaner look.
+  - [ ] Multiday Routes 
 
 
 

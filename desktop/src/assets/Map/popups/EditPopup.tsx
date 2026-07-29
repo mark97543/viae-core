@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Waypoint, useWaypoints } from '../../../context/WaypointContext'
 
 const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay: (value: boolean) => void, data: Waypoint | null }) => {
-    const { editWaypoint } = useWaypoints();
+    const { editWaypoint, removeWaypoint } = useWaypoints();
     
     // Local state for the form fields so we can Cancel without saving
     const [name, setName] = useState('');
@@ -22,6 +22,13 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
             editWaypoint(data.id, { name, description });
         }
         setDisplay(false);
+    };
+
+    const handleDelete = () => {
+        if (data && confirm('Are you sure you want to remove this waypoint?')) {
+            removeWaypoint(data.id);
+            setDisplay(false);
+        }
     };
 
     return (
@@ -52,9 +59,22 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                 </div>
             </div>
 
-            <div className="poi-footer">
-                <button className="poi-close-btn" onClick={() => setDisplay(false)}>Cancel</button>
-                <button className="poi-add-btn" onClick={handleSave} style={{ margin: 0, width: 'auto', flex: 1, marginLeft: '12px' }}>Save Changes</button>
+            <div className="poi-footer" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                <button className="poi-close-btn" onClick={() => setDisplay(false)} style={{ flex: 1, margin: 0 }}>Cancel</button>
+                <button className="poi-add-btn" onClick={handleSave} style={{ flex: 1, margin: 0 }}>Save</button>
+                <div style={{ flexBasis: '100%', height: '4px' }}></div>
+                <button 
+                    className="poi-close-btn" 
+                    onClick={handleDelete} 
+                    style={{ 
+                        flex: 1, 
+                        margin: 0, 
+                        borderColor: 'rgba(239, 68, 68, 0.3)', 
+                        color: '#ef4444' 
+                    }}
+                >
+                    Remove Waypoint
+                </button>
             </div>
         </div>
     )
