@@ -14,10 +14,16 @@ export interface Waypoint {
     description?: string;
 }
 
+export interface RouteLeg {
+    distance: number;
+    duration: number;
+}
+
 export interface RouteData {
     geometry: any;
     distance: number;
     duration: number;
+    legs: RouteLeg[];
 }
 
 interface WaypointContextType {
@@ -101,6 +107,7 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                 let totalDistance = 0;
                 let totalDuration = 0;
                 let allCoords: [number, number][] = [];
+                const legs: RouteLeg[] = [];
 
                 // Calculate route leg-by-leg between each ordered waypoint
                 for (let i = 0; i < waypoints.length - 1; i++) {
@@ -114,6 +121,7 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                         lng2: w2.lng
                     });
                     
+                    legs.push({ distance: leg.distance, duration: leg.duration });
                     totalDistance += leg.distance;
                     totalDuration += leg.duration;
                     allCoords = allCoords.concat(leg.geometry.coordinates);
@@ -125,7 +133,8 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                         coordinates: allCoords
                     },
                     distance: totalDistance, // miles
-                    duration: totalDuration  // seconds
+                    duration: totalDuration, // seconds
+                    legs
                 });
             } catch (error) {
                 console.error("Failed to fetch route natively:", error);

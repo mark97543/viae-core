@@ -18,6 +18,14 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+const formatDuration = (seconds: number) => {
+    const totalMinutes = Math.round(seconds / 60);
+    if (totalMinutes < 60) return `${totalMinutes} min`;
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`;
+};
+
 const SortableWaypointCard = ({ 
     point, 
     index, 
@@ -151,7 +159,7 @@ const LeftPanel = ({
                         </span>
                         <span className="trip-stats-divider">•</span>
                         <span title="Estimated Time">
-                            {Math.round(routeData.duration / 60)} min
+                            {formatDuration(routeData.duration)}
                         </span>
                     </div>
                 )}
@@ -173,15 +181,30 @@ const LeftPanel = ({
                             strategy={verticalListSortingStrategy}
                         >
                             {waypoints.map((point, index) => (
-                                <SortableWaypointCard 
-                                    key={point.id}
-                                    point={point}
-                                    index={index}
-                                    openEdit={openEdit}
-                                    flyToWaypoint={flyToWaypoint}
-                                    handleCopy={handleCopy}
-                                    copiedId={copiedId}
-                                />
+                                <div key={point.id}>
+                                    <SortableWaypointCard 
+                                        point={point}
+                                        index={index}
+                                        openEdit={openEdit}
+                                        flyToWaypoint={flyToWaypoint}
+                                        handleCopy={handleCopy}
+                                        copiedId={copiedId}
+                                    />
+                                    {routeData?.legs && routeData.legs[index] && index < waypoints.length - 1 && (
+                                        <div className="waypoint-leg-connector">
+                                            <div className="leg-line"></div>
+                                            <div className="leg-stats">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                                </svg>
+                                                <span>{formatDuration(routeData.legs[index].duration)}</span>
+                                                <span className="leg-stats-divider">•</span>
+                                                <span>{routeData.legs[index].distance.toFixed(1)} mi</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             ))}
                         </SortableContext>
                     </DndContext>

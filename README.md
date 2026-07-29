@@ -150,7 +150,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Integrate Native Rust 3-Tier Spatial Chunking Routing engine.
   - [X] Calculate routes between the ordered points in the Trip list.
   - [X] Draw route polylines on the MapLibre map layer via GeoJSON.
-  - [ ] Add the time and distance to the left bar
+  - [X] Add the time and distance to the left bar
 - [ ] **Draggable Waypoints**
   - [ ] Render intermediate route waypoints on the map.
   - [ ] Allow user to click and drag waypoints to alter the route.
