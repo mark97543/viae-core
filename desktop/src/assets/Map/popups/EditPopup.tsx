@@ -11,6 +11,8 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
     const [breakHours, setBreakHours] = useState(0);
     const [breakMinutes, setBreakMinutes] = useState(0);
     const [budget, setBudget] = useState(0);
+    const [isOvernight, setIsOvernight] = useState(false);
+    const [nextDayStartTime, setNextDayStartTime] = useState('08:00');
 
     // Sync local state when a new waypoint is opened
     useEffect(() => {
@@ -20,12 +22,22 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
             setBreakHours(data.breakHours || 0);
             setBreakMinutes(data.breakMinutes || 0);
             setBudget(data.budget || 0);
+            setIsOvernight(data.isOvernight || false);
+            setNextDayStartTime(data.nextDayStartTime || '08:00');
         }
     }, [data, display]);
 
     const handleSave = () => {
         if (data) {
-            editWaypoint(data.id, { name, description, breakHours, breakMinutes, budget });
+            editWaypoint(data.id, { 
+                name, 
+                description, 
+                breakHours: isOvernight ? 0 : breakHours, 
+                breakMinutes: isOvernight ? 0 : breakMinutes, 
+                budget,
+                isOvernight,
+                nextDayStartTime: isOvernight ? nextDayStartTime : undefined
+            });
         }
         setDisplay(false);
     };
@@ -54,34 +66,65 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                 </div>
 
                 <div className="poi-section" style={{ marginTop: '16px' }}>
-                    <label className="edit-form-label">Break Duration</label>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <input
-                                className="edit-form-input"
-                                type="number"
-                                min="0"
-                                max="72"
-                                value={breakHours}
-                                onChange={(e) => setBreakHours(parseInt(e.target.value) || 0)}
-                                style={{ width: '100%' }}
-                            />
-                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>hr</span>
-                        </div>
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <input
-                                className="edit-form-input"
-                                type="number"
-                                min="0"
-                                max="59"
-                                value={breakMinutes}
-                                onChange={(e) => setBreakMinutes(parseInt(e.target.value) || 0)}
-                                style={{ width: '100%' }}
-                            />
-                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>min</span>
-                        </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                            type="checkbox"
+                            id="overnightToggle"
+                            checked={isOvernight}
+                            onChange={(e) => setIsOvernight(e.target.checked)}
+                            style={{ cursor: 'pointer', accentColor: '#38bdf8', width: '16px', height: '16px' }}
+                        />
+                        <label htmlFor="overnightToggle" className="edit-form-label" style={{ margin: 0, cursor: 'pointer', color: isOvernight ? '#38bdf8' : '#e2e8f0' }}>
+                            Overnight Layover (End of Day)
+                        </label>
                     </div>
                 </div>
+
+                {!isOvernight ? (
+                    <div className="poi-section" style={{ marginTop: '16px' }}>
+                        <label className="edit-form-label">Break Duration</label>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                    className="edit-form-input"
+                                    type="number"
+                                    min="0"
+                                    max="72"
+                                    value={breakHours}
+                                    onChange={(e) => setBreakHours(parseInt(e.target.value) || 0)}
+                                    style={{ width: '100%' }}
+                                />
+                                <span style={{ color: '#94a3b8', fontSize: '13px' }}>hr</span>
+                            </div>
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                    className="edit-form-input"
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    value={breakMinutes}
+                                    onChange={(e) => setBreakMinutes(parseInt(e.target.value) || 0)}
+                                    style={{ width: '100%' }}
+                                />
+                                <span style={{ color: '#94a3b8', fontSize: '13px' }}>min</span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="poi-section" style={{ marginTop: '16px' }}>
+                        <label className="edit-form-label" style={{ color: '#38bdf8' }}>Next Day Start Time</label>
+                        <input
+                            className="edit-form-input"
+                            type="time"
+                            value={nextDayStartTime}
+                            onChange={(e) => {
+                                setNextDayStartTime(e.target.value);
+                                e.target.blur();
+                            }}
+                            style={{ width: '100%' }}
+                        />
+                    </div>
+                )}
 
                 <div className="poi-section" style={{ marginTop: '16px' }}>
                     <label className="edit-form-label">Route Budget ($)</label>

@@ -14,6 +14,8 @@ export interface Waypoint {
     breakHours?: number;
     breakMinutes?: number;
     budget?: number;
+    isOvernight?: boolean;
+    nextDayStartTime?: string;
 }
 
 export interface RouteLeg {

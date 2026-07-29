@@ -331,3 +331,31 @@
     display: flex;
     justify-content: center;
 }
+
+.day-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0 8px 0;
+    position: relative;
+}
+
+.day-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+}
+
+.day-divider span {
+    background: #0f172a;
+    padding: 0 12px;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 1;
+}

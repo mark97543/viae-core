@@ -41,7 +41,7 @@ const SortableWaypointCard = ({
     flyToWaypoint: (lat: number, lng: number) => void;
     handleCopy: (id: string, lat: number, lng: number) => void;
     copiedId: string | null;
-    timelineData?: { arrival?: Date, departure: Date };
+    timelineData?: { arrival?: Date, departure: Date, dayIndex: number };
 }) => {
     const {
         attributes,
@@ -170,7 +170,7 @@ const LeftPanel = ({
 
     // Calculate arrival and departure times based on routeData and break times
     const calculateTimeline = () => {
-        const timeline: { arrival?: Date, departure: Date }[] = [];
+        const timeline: { arrival?: Date, departure: Date, dayIndex: number }[] = [];
         
         let currentTime = new Date();
         if (tripData?.startDate && tripData?.startTime) {
@@ -184,6 +184,8 @@ const LeftPanel = ({
             currentTime.setHours(8, 0, 0, 0); // Default to 8:00 AM today
         }
 
+        let currentDayIndex = 1;
+
         for (let i = 0; i < waypoints.length; i++) {
             const wp = waypoints[i];
             
@@ -195,15 +197,31 @@ const LeftPanel = ({
                 arrival = new Date(currentTime);
             }
 
-            // Add break time
-            const breakMins = (wp.breakHours || 0) * 60 + (wp.breakMinutes || 0);
-            if (breakMins > 0 || i === 0) {
-                // Point 0 departure is also shifted if it has a break time 
-                currentTime = new Date(currentTime.getTime() + breakMins * 60000);
+            if (wp.isOvernight) {
+                const nextDate = new Date(currentTime);
+                nextDate.setDate(nextDate.getDate() + 1); // Jump to next day
+                if (wp.nextDayStartTime) {
+                    const [hours, minutes] = wp.nextDayStartTime.split(':').map(Number);
+                    nextDate.setHours(hours, minutes, 0, 0);
+                } else {
+                    nextDate.setHours(8, 0, 0, 0);
+                }
+                currentTime = nextDate;
+            } else {
+                // Add break time
+                const breakMins = (wp.breakHours || 0) * 60 + (wp.breakMinutes || 0);
+                if (breakMins > 0 || i === 0) {
+                    // Point 0 departure is also shifted if it has a break time 
+                    currentTime = new Date(currentTime.getTime() + breakMins * 60000);
+                }
             }
             
             const departure = new Date(currentTime);
-            timeline.push({ arrival, departure });
+            timeline.push({ arrival, departure, dayIndex: currentDayIndex });
+
+            if (wp.isOvernight) {
+                currentDayIndex++; // Next waypoint will be on the next day
+            }
         }
         
         return timeline;
@@ -259,8 +277,15 @@ const LeftPanel = ({
                             items={waypoints.map(wp => wp.id)}
                             strategy={verticalListSortingStrategy}
                         >
-                            {waypoints.map((point, index) => (
+                            {waypoints.map((point, index) => {
+                                const isNewDay = index === 0 || (timeline[index]?.dayIndex > timeline[index - 1]?.dayIndex);
+                                return (
                                 <div key={point.id}>
+                                    {isNewDay && (
+                                        <div className="day-divider">
+                                            <span>DAY {timeline[index]?.dayIndex || 1}</span>
+                                        </div>
+                                    )}
                                     <SortableWaypointCard 
                                         point={point}
                                         index={index}
@@ -285,7 +310,8 @@ const LeftPanel = ({
                                         </div>
                                     )}
                                 </div>
-                            ))}
+                                );
+                            })}
                         </SortableContext>
                     </DndContext>
                 )}
