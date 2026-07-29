@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Map, Marker } from 'maplibre-gl';
 import { invoke } from '@tauri-apps/api/core';
+import { useWaypoints } from '../../../context/WaypointContext';
 
 export function useTacticalMap(
     mapContainer: React.RefObject<HTMLDivElement | null>,
@@ -9,7 +10,10 @@ export function useTacticalMap(
 ) {
     const mapInstance = useRef<Map | null>(null);
     const searchMarker = useRef<Marker | null>(null);
+    const waypointMarkers = useRef<Marker[]>([]);
+    const { waypoints } = useWaypoints();
 
+    const [isMapReady, setIsMapReady] = useState(false);
     const [poiPopup, setPoiPopup] = useState(false);
     const [poiData, setPoiData] = useState<any>('');
     const [markerPopup, setMarkerPopup] = useState(false);
@@ -51,6 +55,7 @@ export function useTacticalMap(
                 bearing: 0   // Rotates the map slightly for a cinematic view
             });
             mapInstance.current = map;
+            setIsMapReady(true);
 
             //Fetch Dynamic map Center and Bounds from the local mbt tiles container via Rust
             invoke<Record<string, string>>('get_map_metadata').then((meta) => {
@@ -170,6 +175,24 @@ export function useTacticalMap(
             }
         };
     }, [activeMapFile, theme, mapContainer]);
+
+    // Sync waypoints to map markers
+    useEffect(() => {
+        if (!isMapReady || !mapInstance.current) return;
+        const map = mapInstance.current;
+
+        // Clean up old markers
+        waypointMarkers.current.forEach(marker => marker.remove());
+        waypointMarkers.current = [];
+
+        // Draw new red markers for waypoints
+        waypoints.forEach(wp => {
+            const el = new Marker({ color: '#ef4444' }) // Red marker
+                .setLngLat([wp.lng, wp.lat])
+                .addTo(map);
+            waypointMarkers.current.push(el);
+        });
+    }, [waypoints, isMapReady]);
 
     return {
         mapInstance,
