@@ -10,6 +10,7 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
     const [description, setDescription] = useState('');
     const [breakHours, setBreakHours] = useState(0);
     const [breakMinutes, setBreakMinutes] = useState(0);
+    const [budget, setBudget] = useState(0);
 
     // Sync local state when a new waypoint is opened
     useEffect(() => {
@@ -18,12 +19,13 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
             setDescription(data.description || '');
             setBreakHours(data.breakHours || 0);
             setBreakMinutes(data.breakMinutes || 0);
+            setBudget(data.budget || 0);
         }
     }, [data, display]);
 
     const handleSave = () => {
         if (data) {
-            editWaypoint(data.id, { name, description, breakHours, breakMinutes });
+            editWaypoint(data.id, { name, description, breakHours, breakMinutes, budget });
         }
         setDisplay(false);
     };
@@ -77,6 +79,24 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                                 style={{ width: '100%' }}
                             />
                             <span style={{ color: '#94a3b8', fontSize: '13px' }}>min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="poi-section" style={{ marginTop: '16px' }}>
+                    <label className="edit-form-label">Route Budget ($)</label>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>$</span>
+                            <input
+                                className="edit-form-input"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={budget}
+                                onChange={(e) => setBudget(parseFloat(e.target.value) || 0)}
+                                style={{ width: '100%' }}
+                            />
                         </div>
                     </div>
                 </div>

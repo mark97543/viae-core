@@ -13,6 +13,7 @@ export interface Waypoint {
     description?: string;
     breakHours?: number;
     breakMinutes?: number;
+    budget?: number;
 }
 
 export interface RouteLeg {

@@ -301,6 +301,10 @@ const LeftPanel = ({
                         <span title="Estimated Time">
                             {formatDuration(routeData.duration)}
                         </span>
+                        <span className="trip-stats-divider">•</span>
+                        <span title="Route Budget" style={{ color: '#10b981' }}>
+                            ${waypoints.reduce((total, wp) => total + (wp.budget || 0), 0).toFixed(2)}
+                        </span>
                     </div>
                 </div>
             )}

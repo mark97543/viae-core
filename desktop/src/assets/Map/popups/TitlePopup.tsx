@@ -12,7 +12,7 @@ const formatDuration = (seconds: number) => {
 
 const TitlePopup = ({ display, setDisplay, tripData, setTripData }: { display: boolean, setDisplay: (value: boolean) => void, tripData: Trip | null, setTripData: (tripData: Trip | null) => void }) => {
     
-    const { routeData } = useWaypoints();
+    const { routeData, waypoints } = useWaypoints();
     
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -94,9 +94,15 @@ const TitlePopup = ({ display, setDisplay, tripData, setTripData }: { display: b
                             <span style={{ color: '#94a3b8', fontSize: '13px' }}>Total Distance</span>
                             <span style={{ color: '#f1f5f9', fontSize: '13px', fontWeight: 500 }}>{routeData.distance.toFixed(1)} miles</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                             <span style={{ color: '#94a3b8', fontSize: '13px' }}>Total Driving Time</span>
                             <span style={{ color: '#f1f5f9', fontSize: '13px', fontWeight: 500 }}>{formatDuration(routeData.duration)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>Route Budget</span>
+                            <span style={{ color: '#10b981', fontSize: '13px', fontWeight: 500 }}>
+                                ${waypoints.reduce((total, wp) => total + (wp.budget || 0), 0).toFixed(2)}
+                            </span>
                         </div>
                     </div>
                 )}
