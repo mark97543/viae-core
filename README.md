@@ -175,7 +175,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Multiday Routes 
   - [X] Waypoint types (i.e. Fuel, Food, Lodging, Attraction, Shaping)
   - [ ] Range Finder
-  - [ ] Different color Lines for different days 
+  - [X] Different color Lines for different days
   - [X] Route Budget
 
 

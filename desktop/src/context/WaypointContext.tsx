@@ -114,13 +114,18 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
             try {
                 let totalDistance = 0;
                 let totalDuration = 0;
-                let allCoords: [number, number][] = [];
                 const legs: RouteLeg[] = [];
+                const features: any[] = [];
+                let currentDayIndex = 1;
 
                 // Calculate route leg-by-leg between each ordered waypoint
                 for (let i = 0; i < waypoints.length - 1; i++) {
                     const w1 = waypoints[i];
                     const w2 = waypoints[i + 1];
+                    
+                    if (w1.isOvernight) {
+                        currentDayIndex++;
+                    }
                     
                     const leg: any = await invoke('calculate_route', {
                         lat1: w1.lat,
@@ -132,13 +137,18 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                     legs.push({ distance: leg.distance, duration: leg.duration });
                     totalDistance += leg.distance;
                     totalDuration += leg.duration;
-                    allCoords = allCoords.concat(leg.geometry.coordinates);
+                    
+                    features.push({
+                        type: 'Feature',
+                        properties: { day: currentDayIndex },
+                        geometry: leg.geometry
+                    });
                 }
 
                 setRouteData({
                     geometry: {
-                        type: 'LineString',
-                        coordinates: allCoords
+                        type: 'FeatureCollection',
+                        features: features
                     },
                     distance: totalDistance, // miles
                     duration: totalDuration, // seconds

@@ -30,25 +30,30 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
     }, [data, display]);
 
     const handleSave = () => {
-        if (data) {
-            editWaypoint(data.id, { 
-                name, 
-                description, 
-                breakHours: isOvernight ? 0 : breakHours, 
-                breakMinutes: isOvernight ? 0 : breakMinutes, 
-                budget,
-                isOvernight,
-                nextDayStartTime: isOvernight ? nextDayStartTime : undefined,
-                type
-            });
-        }
         setDisplay(false);
+        if (data) {
+            // Defer the heavy route calculation to allow the CSS close animation to play smoothly
+            setTimeout(() => {
+                editWaypoint(data.id, { 
+                    name, 
+                    description, 
+                    breakHours: isOvernight ? 0 : breakHours, 
+                    breakMinutes: isOvernight ? 0 : breakMinutes, 
+                    budget,
+                    isOvernight,
+                    nextDayStartTime: isOvernight ? nextDayStartTime : undefined,
+                    type
+                });
+            }, 300);
+        }
     };
 
     const handleDelete = () => {
         if (data && confirm('Are you sure you want to remove this waypoint?')) {
-            removeWaypoint(data.id);
             setDisplay(false);
+            setTimeout(() => {
+                removeWaypoint(data.id);
+            }, 300);
         }
     };
 

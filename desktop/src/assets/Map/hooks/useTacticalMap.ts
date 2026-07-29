@@ -407,7 +407,16 @@ export function useTacticalMap(
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#38bdf8', // Tactical cyan glow
+                    'line-color': [
+                        'match',
+                        ['%', ['get', 'day'], 5],
+                        1, '#38bdf8', // Cyan
+                        2, '#c084fc', // Purple
+                        3, '#4ade80', // Green
+                        4, '#fbbf24', // Orange
+                        0, '#f87171', // Red
+                        '#38bdf8'     // fallback
+                    ],
                     'line-width': 8,
                     'line-opacity': 0.3
                 }
@@ -423,7 +432,16 @@ export function useTacticalMap(
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#00b4d8', // Vibrant Tactical Cyan/Blue
+                    'line-color': [
+                        'match',
+                        ['%', ['get', 'day'], 5],
+                        1, '#00b4d8', // Cyan
+                        2, '#a855f7', // Purple
+                        3, '#22c55e', // Green
+                        4, '#f59e0b', // Orange
+                        0, '#ef4444', // Red
+                        '#00b4d8'     // fallback
+                    ],
                     'line-width': 4,
                     'line-opacity': 0.95
                 }
