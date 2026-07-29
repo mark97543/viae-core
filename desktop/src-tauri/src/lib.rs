@@ -46,6 +46,10 @@ pub fn run() {
                         //Send the signal to the front end
                         let _ = app_handle.emit("navigate-to-view", "map-loader");
                     }
+                    "newtrip" => {
+                        //Send the signal to the front end
+                        let _ = app_handle.emit("new-trip", ());
+                    }
                     _ => {
                         let themes = [
                             "klokantech-basic", "klokantech-3d", "osm-liberty", "maptiler-basic",

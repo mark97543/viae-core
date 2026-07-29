@@ -5,9 +5,11 @@ use tauri::{
 
 pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
     //Define the individual Action items
+    let new_trip = MenuItem:: with_id(app, "newtrip", "New Trip", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
+    
     //Build the subMenus
-    let file_menu = Submenu::with_items(app, "File", true, &[&quit_item])?;
+    let file_menu = Submenu::with_items(app, "File", true, &[&new_trip, &quit_item])?;
 
     //Map Tools Menu
     let map_import = MenuItem::with_id(app, "mapimport", "Import", true, None::<&str>)?;

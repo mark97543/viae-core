@@ -36,6 +36,20 @@
     text-transform: uppercase;
 }
 
+.trip-title-clickable {
+    cursor: pointer;
+    transition: color 0.2s ease;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trip-title-clickable:hover {
+    color: #38bdf8;
+}
+
 .left-panel-clear {
     background: transparent;
     border: none;

@@ -2,8 +2,8 @@ import './LeftPanel.css'
 import { useState } from 'react'
 import { useWaypoints, Waypoint } from '../../../context/WaypointContext'
 
-const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
-    const { waypoints, removeWaypoint, clearWaypoints } = useWaypoints();
+const LeftPanel = ({ openEdit, openTripSettings }: { openEdit: (data: Waypoint) => void, openTripSettings: () => void }) => {
+    const { waypoints, removeWaypoint, clearWaypoints, tripData, setTripData } = useWaypoints();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const handleCopy = (id: string, lat: number, lng: number) => {
@@ -15,7 +15,9 @@ const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
     return (
         <div className="left-panel">
             <div className="left-panel-header">
-                <h1>Tactical Plan</h1>
+                <h1 className="trip-title-clickable" title="Edit Trip Settings" onClick={openTripSettings}>
+                    {tripData?.name}
+                </h1>
             </div>
 
             <div className="left-panel-content">
@@ -36,7 +38,7 @@ const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
                                     </h3>
                                 </div>
                                 <div className="waypoint-card-coords-row">
-                                    <p 
+                                    <p
                                         className="waypoint-card-coords"
                                         onClick={() => handleCopy(point.id, point.lat, point.lng)}
                                         title="Click to copy coordinates"

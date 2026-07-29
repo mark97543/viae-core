@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { listen } from '@tauri-apps/api/event';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 export interface Waypoint {
     id: string;
@@ -15,12 +17,25 @@ interface WaypointContextType {
     editWaypoint: (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => void;
     removeWaypoint: (id: string) => void;
     clearWaypoints: () => void;
+    tripData: Trip | null;
+    setTripData: (trip: Trip | null) => void;
+}
+
+export interface Trip {
+    name: string;
+    description?: string;
 }
 
 const WaypointContext = createContext<WaypointContextType | undefined>(undefined);
 
 export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+    const [tripData, setTripData] = useState<Trip | null>({
+        name: 'New Trip',
+        description: ''
+    })
+
+
 
     const addWaypoint = (waypoint: Omit<Waypoint, 'id'>) => {
         const newWaypoint: Waypoint = {
@@ -31,7 +46,7 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const editWaypoint = (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => {
-        setWaypoints((prev) => 
+        setWaypoints((prev) =>
             prev.map((wp) => wp.id === id ? { ...wp, ...updatedData } : wp)
         );
     };
@@ -44,8 +59,37 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
         setWaypoints([]);
     };
 
+    //Listeners 
+    useEffect(() => {
+        const unlisten = listen('new-trip', async () => {
+            const isConfirmed = await confirm(
+                'Do you want start new trip. All unsaved data will be lost!',
+                {
+                    title: 'New Trip',
+                    kind: 'warning',
+                    okLabel: 'Yes',
+                    cancelLabel: 'No',
+                }
+            );
+            if (isConfirmed) {
+                clearWaypoints();
+                setTripData({ name: 'New Trip', description: '' });
+            }
+        });
+        return () => {
+            unlisten.then(f => f());
+        };
+
+
+    }, []);
+
+
     return (
-        <WaypointContext.Provider value={{ waypoints, addWaypoint, editWaypoint, removeWaypoint, clearWaypoints }}>
+        <WaypointContext.Provider value={{
+            waypoints, addWaypoint,
+            editWaypoint, removeWaypoint, clearWaypoints,
+            tripData, setTripData
+        }}>
             {children}
         </WaypointContext.Provider>
     );

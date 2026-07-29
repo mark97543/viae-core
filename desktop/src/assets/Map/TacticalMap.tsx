@@ -9,8 +9,10 @@ import SearchBar from './Gui Items/SearchBar';
 import { THEMES, setupMapLibre } from './mapConfig';
 import { parseCoordinates } from './mapUtils';
 import { useTacticalMap } from './hooks/useTacticalMap';
+import { useWaypoints } from '../../context/WaypointContext';
 import LeftPanel from './popups/LeftPanel';
 import EditPopup from './popups/EditPopup';
+import TitlePopup from './popups/TitlePopup';
 
 // Initialize the map worker and custom mbtiles protocol globally
 setupMapLibre();
@@ -23,6 +25,9 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const mapContainer = useRef<HTMLDivElement>(null);
     const [theme, setTheme] = useState('osm-bright');
     const [search, setSearch] = useState('');
+    const [titlePopup, setTitlePopup] = useState(false);
+    
+    const { tripData, setTripData } = useWaypoints();
 
     const {
         mapInstance,
@@ -91,12 +96,22 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
             <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup} />
-            <LeftPanel openEdit={(data) => {
-                setEditData(data);
-                setEditPopup(true);
-                setPoiPopup(false);
-                setMarkerPopup(false);
-            }} />
+            <LeftPanel 
+                openEdit={(data) => {
+                    setEditData(data);
+                    setEditPopup(true);
+                    setPoiPopup(false);
+                    setMarkerPopup(false);
+                    setTitlePopup(false);
+                }} 
+                openTripSettings={() => {
+                    setTitlePopup(true);
+                    setPoiPopup(false);
+                    setMarkerPopup(false);
+                    setEditPopup(false);
+                }}
+            />
+            <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
         </div>
     )
 }

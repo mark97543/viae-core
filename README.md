@@ -139,9 +139,12 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Built a global `WaypointContext` to manage waypoint state.
   - [X] Created the `EditPopup` template and wired it up with exclusive popup logic (only one right panel open at a time).
   - [X] Synced `WaypointContext` with MapLibre so that persistent red markers are drawn for all stops.
+  - [X] Refined LeftPanel card UI (tactical styling, unified action bar, clickable coordinates).
+  - [X] Implemented the actual editing logic inside the `EditPopup` (changing names/descriptions and saving to context).
+  - [X] Built dynamic Trip Settings popup to customize the Trip Name and Summary.
   - [ ] Implement drag-and-drop reordering for the list of stops.
-  - [ ] Implement the actual editing logic inside the `EditPopup` (changing names/descriptions).
   - [ ] Add Save/Load functionality to persist the tactical plan to a local file.
+  - [X] Added "New Trip" feature via Tauri native menu, including a native warning dialog to safely clear the plan.
 - [ ] **Routing & Pathfinding**
   - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
   - [ ] Calculate routes between the ordered points in the Trip list.
