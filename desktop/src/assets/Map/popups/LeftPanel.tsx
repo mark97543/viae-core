@@ -26,11 +26,25 @@ const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
                 ) : (
                     waypoints.map((point, index) => (
                         <div key={point.id} className="waypoint-card">
-                            <div className="waypoint-card-header">
-                                <h3 className="waypoint-card-title">
-                                    {index + 1}. {point.name || 'Custom Location'}
-                                </h3>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <div className="waypoint-drag-handle">
+                                {index + 1}
+                            </div>
+                            <div className="waypoint-card-content">
+                                <div className="waypoint-card-header">
+                                    <h3 className="waypoint-card-title">
+                                        {point.name || 'Custom Location'}
+                                    </h3>
+                                </div>
+                                <div className="waypoint-card-coords-row">
+                                    <p 
+                                        className="waypoint-card-coords"
+                                        onClick={() => handleCopy(point.id, point.lat, point.lng)}
+                                        title="Click to copy coordinates"
+                                    >
+                                        {copiedId === point.id ? "Copied!" : `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`}
+                                    </p>
+                                </div>
+                                <div className="waypoint-card-actions">
                                     <button
                                         className="waypoint-card-edit-btn"
                                         onClick={() => openEdit(point)}
@@ -38,6 +52,7 @@ const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
                                     >
                                         Edit
                                     </button>
+                                    <div style={{ flex: 1 }}></div>
                                     <button
                                         className="waypoint-card-remove"
                                         onClick={() => removeWaypoint(point.id)}
@@ -47,17 +62,6 @@ const LeftPanel = ({ openEdit }: { openEdit: (data: Waypoint) => void }) => {
                                     </button>
                                 </div>
                             </div>
-                            <div className="waypoint-card-coords-row">
-                                <p className="waypoint-card-coords">
-                                    {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
-                                </p>
-                                <button className="left-panel-copy-btn" onClick={() => handleCopy(point.id, point.lat, point.lng)}>
-                                    {copiedId === point.id ? "Copied!" : "Copy"}
-                                </button>
-                            </div>
-                            {point.type && (
-                                <span className="waypoint-card-type">{point.type}</span>
-                            )}
                         </div>
                     ))
                 )}
