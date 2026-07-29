@@ -295,6 +295,9 @@ export function useTacticalMap(
                 }
             });
 
+            // Ensure waypoint layer is at the very top of the WebGL stack
+            map.moveLayer(layerId);
+
             // Hover cursor feedback
             map.on('mouseenter', layerId, () => {
                 map.getCanvas().style.cursor = 'pointer';
@@ -382,7 +385,7 @@ export function useTacticalMap(
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#38bdf8', // Tactical cyan
+                    'line-color': '#38bdf8', // Tactical cyan glow
                     'line-width': 8,
                     'line-opacity': 0.3
                 }
@@ -398,9 +401,9 @@ export function useTacticalMap(
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#38bdf8',
-                    'line-width': 3,
-                    'line-opacity': 1.0
+                    'line-color': '#00b4d8', // Vibrant Tactical Cyan/Blue
+                    'line-width': 4,
+                    'line-opacity': 0.95
                 }
             });
         }
@@ -414,6 +417,11 @@ export function useTacticalMap(
                 type: 'FeatureCollection',
                 features: []
             });
+        }
+
+        // Move waypoint layer to the VERY TOP of WebGL layer stack so markers are drawn above the route line
+        if (map.getLayer('tactical-waypoints-layer')) {
+            map.moveLayer('tactical-waypoints-layer');
         }
     }, [routeData, isMapReady]);
 
