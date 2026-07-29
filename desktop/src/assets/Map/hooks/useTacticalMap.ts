@@ -56,6 +56,19 @@ export function useTacticalMap(
             mapInstance.current = map;
             setIsMapReady(true);
 
+            // Handle missing style images (swallow warnings for missing theme sprite icons)
+            map.on('styleimagemissing', (e) => {
+                const id = e.id;
+                if (map && !map.hasImage(id)) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1;
+                    canvas.height = 1;
+                    const ctx = canvas.getContext('2d')!;
+                    const imgData = ctx.getImageData(0, 0, 1, 1);
+                    map.addImage(id, imgData as any);
+                }
+            });
+
             //Fetch Dynamic map Center and Bounds from the local mbt tiles container via Rust
             invoke<Record<string, string>>('get_map_metadata').then((meta) => {
                 if (meta && meta.center && map) {
@@ -247,19 +260,16 @@ export function useTacticalMap(
             const iconId = `wp-icon-${wp.id}-${index}-${wp.type || 'default'}`;
             if (!map.hasImage(iconId)) {
                 const imgData = generateWaypointImageData(index, wp.type);
-                map.addImage(iconId, {
-                    width: 60,
-                    height: 80,
-                    data: imgData.data
-                } as any, { pixelRatio: 2 } as any);
+                map.addImage(iconId, imgData as any, { pixelRatio: 2 } as any);
             }
         });
 
-        // 2. Prepare GeoJSON FeatureCollection
+        // 2. Prepare GeoJSON FeatureCollection with numeric feature ids for feature-state animations
         const geojson: any = {
             type: 'FeatureCollection',
             features: waypoints.map((wp, index) => ({
                 type: 'Feature',
+                id: index + 1, // Feature ID required for setFeatureState
                 geometry: {
                     type: 'Point',
                     coordinates: [wp.lng, wp.lat]
@@ -290,6 +300,7 @@ export function useTacticalMap(
                 layout: {
                     'icon-image': ['get', 'icon'],
                     'icon-anchor': 'bottom',
+                    'icon-size': 1.0,
                     'icon-allow-overlap': true,
                     'icon-ignore-placement': true
                 }
@@ -306,17 +317,23 @@ export function useTacticalMap(
                 map.getCanvas().style.cursor = '';
             });
 
-            // Native WebGL Feature Drag & Drop
+            // Native WebGL Feature Drag & Drop with interactive scale lift
             map.on('mousedown', layerId, (e: any) => {
                 if (!e.features || e.features.length === 0) return;
                 e.preventDefault();
 
                 const feature = e.features[0];
                 const wpId = feature.properties?.id;
+                const featureId = feature.id;
                 if (!wpId) return;
 
                 map.getCanvas().style.cursor = 'grabbing';
                 map.dragPan.disable();
+
+                // Set feature state to trigger 1.25x scale lift animation
+                if (featureId) {
+                    map.setFeatureState({ source: sourceId, id: featureId }, { dragging: true });
+                }
 
                 const onMouseMove = (moveEvent: any) => {
                     const { lng, lat } = moveEvent.lngLat;
@@ -343,6 +360,11 @@ export function useTacticalMap(
                     const { lng, lat } = upEvent.lngLat;
                     map.getCanvas().style.cursor = '';
                     map.dragPan.enable();
+
+                    // Reset feature state to pop marker back down to 1.0x
+                    if (featureId) {
+                        map.setFeatureState({ source: sourceId, id: featureId }, { dragging: false });
+                    }
 
                     map.off('mousemove', onMouseMove);
                     map.off('mouseup', onMouseUp);
