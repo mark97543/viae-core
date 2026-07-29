@@ -13,6 +13,7 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
     const [budget, setBudget] = useState(0);
     const [isOvernight, setIsOvernight] = useState(false);
     const [nextDayStartTime, setNextDayStartTime] = useState('08:00');
+    const [type, setType] = useState<'default' | 'fuel' | 'food' | 'lodging' | 'attraction' | 'shaping' | 'marker' | 'poi'>('default');
 
     // Sync local state when a new waypoint is opened
     useEffect(() => {
@@ -24,6 +25,7 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
             setBudget(data.budget || 0);
             setIsOvernight(data.isOvernight || false);
             setNextDayStartTime(data.nextDayStartTime || '08:00');
+            setType(data.type || 'default');
         }
     }, [data, display]);
 
@@ -36,7 +38,8 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                 breakMinutes: isOvernight ? 0 : breakMinutes, 
                 budget,
                 isOvernight,
-                nextDayStartTime: isOvernight ? nextDayStartTime : undefined
+                nextDayStartTime: isOvernight ? nextDayStartTime : undefined,
+                type
             });
         }
         setDisplay(false);
@@ -63,6 +66,23 @@ const EditPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter a custom name..."
                     />
+                </div>
+
+                <div className="poi-section" style={{ marginTop: '16px' }}>
+                    <label className="edit-form-label">Waypoint Type</label>
+                    <select 
+                        className="edit-form-input" 
+                        value={type} 
+                        onChange={(e) => setType(e.target.value as any)}
+                        style={{ width: '100%', cursor: 'pointer' }}
+                    >
+                        <option value="default">Default</option>
+                        <option value="shaping">Shaping Point (Pass-through)</option>
+                        <option value="lodging">Lodging</option>
+                        <option value="fuel">Fuel</option>
+                        <option value="food">Food</option>
+                        <option value="attraction">Attraction</option>
+                    </select>
                 </div>
 
                 <div className="poi-section" style={{ marginTop: '16px' }}>

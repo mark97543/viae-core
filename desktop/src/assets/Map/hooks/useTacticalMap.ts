@@ -10,7 +10,6 @@ export function useTacticalMap(
 ) {
     const mapInstance = useRef<Map | null>(null);
     const searchMarker = useRef<Marker | null>(null);
-    const waypointMarkers = useRef<Marker[]>([]);
     const { waypoints, routeData, editWaypoint } = useWaypoints();
 
     const [isMapReady, setIsMapReady] = useState(false);
@@ -181,28 +180,177 @@ export function useTacticalMap(
         };
     }, [activeMapFile, theme, mapContainer]);
 
-    // Sync waypoints to map markers
+    const getMarkerColor = (type?: string) => {
+        switch (type) {
+            case 'lodging': return '#3b82f6';
+            case 'fuel': return '#f97316';
+            case 'food': return '#22c55e';
+            case 'attraction': return '#a855f7';
+            case 'shaping': return '#94a3b8';
+            case 'default':
+            default: return '#ef4444';
+        }
+    };
+
+    // Helper to generate 2x retina crisp canvas icon for WebGL Symbol Layer
+    const generateWaypointImageData = (index: number, type?: string) => {
+        const color = getMarkerColor(type);
+        const canvas = document.createElement('canvas');
+        canvas.width = 60;  // 2x retina scale (30px logical)
+        canvas.height = 80; // 2x retina scale (40px logical)
+        const ctx = canvas.getContext('2d')!;
+
+        ctx.scale(2, 2);
+
+        // Teardrop path (30x40) with tip at (15, 38.5)
+        ctx.beginPath();
+        ctx.moveTo(15, 38.5);
+        ctx.bezierCurveTo(15, 38.5, 2.5, 24, 2.5, 13.5);
+        ctx.bezierCurveTo(2.5, 6.6, 8.1, 1, 15, 1);
+        ctx.bezierCurveTo(21.9, 1, 27.5, 6.6, 27.5, 13.5);
+        ctx.bezierCurveTo(27.5, 24, 15, 38.5, 15, 38.5);
+        ctx.closePath();
+
+        // Fill & Stroke
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
+
+        // Sleek White Badge (circle at 15, 13.5, r=7.5)
+        ctx.beginPath();
+        ctx.arc(15, 13.5, 7.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // High-contrast sharp text
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '900 10.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(index + 1), 15, 14);
+
+        return ctx.getImageData(0, 0, 60, 80);
+    };
+
+    // Sync waypoints to native WebGL Symbol Layer (0ms lag, 0px drift, 100% GPU locked)
     useEffect(() => {
         if (!isMapReady || !mapInstance.current) return;
         const map = mapInstance.current;
 
-        // Clean up old markers
-        waypointMarkers.current.forEach(marker => marker.remove());
-        waypointMarkers.current = [];
+        const sourceId = 'tactical-waypoints-source';
+        const layerId = 'tactical-waypoints-layer';
 
-        // Draw new red markers for waypoints
-        waypoints.forEach(wp => {
-            const el = new Marker({ color: '#ef4444', draggable: true }) // Red marker, draggable!
-                .setLngLat([wp.lng, wp.lat])
-                .addTo(map);
-                
-            el.on('dragend', () => {
-                const lngLat = el.getLngLat();
-                editWaypoint(wp.id, { lat: lngLat.lat, lng: lngLat.lng });
+        // 1. Generate & Add/Update WebGL images for each waypoint
+        waypoints.forEach((wp, index) => {
+            const iconId = `wp-icon-${wp.id}-${index}-${wp.type || 'default'}`;
+            if (!map.hasImage(iconId)) {
+                const imgData = generateWaypointImageData(index, wp.type);
+                map.addImage(iconId, {
+                    width: 60,
+                    height: 80,
+                    data: imgData.data
+                } as any, { pixelRatio: 2 } as any);
+            }
+        });
+
+        // 2. Prepare GeoJSON FeatureCollection
+        const geojson: any = {
+            type: 'FeatureCollection',
+            features: waypoints.map((wp, index) => ({
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [wp.lng, wp.lat]
+                },
+                properties: {
+                    id: wp.id,
+                    index,
+                    icon: `wp-icon-${wp.id}-${index}-${wp.type || 'default'}`
+                }
+            }))
+        };
+
+        // 3. Update or Add GeoJSON Source
+        const existingSource = map.getSource(sourceId) as any;
+        if (existingSource) {
+            existingSource.setData(geojson);
+        } else {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: geojson
             });
 
-            waypointMarkers.current.push(el);
-        });
+            // 4. Add WebGL Symbol Layer
+            map.addLayer({
+                id: layerId,
+                type: 'symbol',
+                source: sourceId,
+                layout: {
+                    'icon-image': ['get', 'icon'],
+                    'icon-anchor': 'bottom',
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            });
+
+            // Hover cursor feedback
+            map.on('mouseenter', layerId, () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', layerId, () => {
+                map.getCanvas().style.cursor = '';
+            });
+
+            // Native WebGL Feature Drag & Drop
+            map.on('mousedown', layerId, (e: any) => {
+                if (!e.features || e.features.length === 0) return;
+                e.preventDefault();
+
+                const feature = e.features[0];
+                const wpId = feature.properties?.id;
+                if (!wpId) return;
+
+                map.getCanvas().style.cursor = 'grabbing';
+                map.dragPan.disable();
+
+                const onMouseMove = (moveEvent: any) => {
+                    const { lng, lat } = moveEvent.lngLat;
+                    // Update GeoJSON source dynamically during drag
+                    const currentGeoJson = (map.getSource(sourceId) as any)._data;
+                    if (currentGeoJson) {
+                        const updatedFeatures = currentGeoJson.features.map((f: any) => {
+                            if (f.properties.id === wpId) {
+                                return {
+                                    ...f,
+                                    geometry: { ...f.geometry, coordinates: [lng, lat] }
+                                };
+                            }
+                            return f;
+                        });
+                        (map.getSource(sourceId) as any).setData({
+                            ...currentGeoJson,
+                            features: updatedFeatures
+                        });
+                    }
+                };
+
+                const onMouseUp = (upEvent: any) => {
+                    const { lng, lat } = upEvent.lngLat;
+                    map.getCanvas().style.cursor = '';
+                    map.dragPan.enable();
+
+                    map.off('mousemove', onMouseMove);
+                    map.off('mouseup', onMouseUp);
+
+                    editWaypoint(wpId, { lat, lng });
+                };
+
+                map.on('mousemove', onMouseMove);
+                map.once('mouseup', onMouseUp);
+            });
+        }
     }, [waypoints, isMapReady, editWaypoint]);
 
     // Sync route data to map layer

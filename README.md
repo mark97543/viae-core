@@ -173,8 +173,9 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Trip overview to zoom out see whole trip 
   - [X] Modify the waypoint buttons to thin out the div and have a cleaner look.
   - [X] Multiday Routes 
-  - [ ] Waypoint types (i.e. Fuel, Food, Hotel, Camp)
+  - [X] Waypoint types (i.e. Fuel, Food, Lodging, Attraction, Shaping)
   - [ ] Range Finder
+  - [ ] Different color Lines for different days 
   - [X] Route Budget
 
 

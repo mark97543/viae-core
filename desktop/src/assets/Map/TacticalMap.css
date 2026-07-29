@@ -12,3 +12,14 @@
     bottom: 0;
     left: 0;
 }
+
+/* Force GPU compositing for MapLibre HTML markers to lock them 1:1 with WebGL canvas pan */
+.maplibregl-marker,
+.custom-waypoint-marker,
+.custom-waypoint-marker * {
+    transition: none !important;
+    animation: none !important;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}

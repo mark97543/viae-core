@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef, useCallback } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { confirm, save, open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -9,7 +9,7 @@ export interface Waypoint {
     name: string;
     lat: number;
     lng: number;
-    type?: 'marker' | 'poi';
+    type?: 'default' | 'fuel' | 'food' | 'lodging' | 'attraction' | 'shaping' | 'marker' | 'poi';
     description?: string;
     breakHours?: number;
     breakMinutes?: number;
@@ -72,36 +72,36 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     }, [tripData, waypoints, currentFilePath]);
 
 
-    const addWaypoint = (waypoint: Omit<Waypoint, 'id'>) => {
+    const addWaypoint = useCallback((waypoint: Omit<Waypoint, 'id'>) => {
         const newWaypoint: Waypoint = {
             ...waypoint,
             id: crypto.randomUUID(),
         };
         setWaypoints((prev) => [...prev, newWaypoint]);
-    };
+    }, []);
 
-    const editWaypoint = (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => {
+    const editWaypoint = useCallback((id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => {
         setWaypoints((prev) =>
             prev.map((wp) => wp.id === id ? { ...wp, ...updatedData } : wp)
         );
-    };
+    }, []);
 
-    const removeWaypoint = (id: string) => {
+    const removeWaypoint = useCallback((id: string) => {
         setWaypoints((prev) => prev.filter((wp) => wp.id !== id));
-    };
+    }, []);
 
-    const reorderWaypoints = (oldIndex: number, newIndex: number) => {
+    const reorderWaypoints = useCallback((startIndex: number, endIndex: number) => {
         setWaypoints((prev) => {
             const result = Array.from(prev);
-            const [removed] = result.splice(oldIndex, 1);
-            result.splice(newIndex, 0, removed);
+            const [removed] = result.splice(startIndex, 1);
+            result.splice(endIndex, 0, removed);
             return result;
         });
-    };
+    }, []);
 
-    const clearWaypoints = () => {
+    const clearWaypoints = useCallback(() => {
         setWaypoints([]);
-    };
+    }, []);
 
     // Auto-calculate route natively in Rust whenever waypoints change
     useEffect(() => {
