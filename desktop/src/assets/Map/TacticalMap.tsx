@@ -40,6 +40,16 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         editData, setEditData
     } = useTacticalMap(mapContainer, activeMapFile, theme);
 
+    const flyToWaypoint = (lat: number, lng: number) => {
+        if (mapInstance.current) {
+            mapInstance.current.flyTo({
+                center: [lng, lat],
+                zoom: 16,
+                speed: 1.5 // Nice tactical swoop
+            });
+        }
+    };
+
     // Fly to coordinates only when requested
     const executeSearch = () => {
         if (!mapInstance.current || !search) return;
@@ -103,6 +113,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     setPoiPopup(false);
                     setMarkerPopup(false);
                     setTitlePopup(false);
+                    flyToWaypoint(data.lat, data.lng);
                 }} 
                 openTripSettings={() => {
                     setTitlePopup(true);
@@ -110,6 +121,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     setMarkerPopup(false);
                     setEditPopup(false);
                 }}
+                flyToWaypoint={flyToWaypoint}
             />
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
         </div>

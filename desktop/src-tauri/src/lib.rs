@@ -2,7 +2,8 @@ mod menu;
 mod tool;
 mod commands;
 mod maptiles;
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
+use tauri_plugin_opener::OpenerExt;
 
 
 #[tauri::command]
@@ -28,7 +29,9 @@ pub fn run() {
             tool::import_map_file,
             crate::commands::get_map_tile,
             crate::commands::get_map_metadata,
-            crate::commands::get_poi_details
+            crate::commands::get_poi_details,
+            crate::commands::save_trip_file,
+            crate::commands::load_trip_file
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file
@@ -49,6 +52,29 @@ pub fn run() {
                     "newtrip" => {
                         //Send the signal to the front end
                         let _ = app_handle.emit("new-trip", ());
+                    }
+                    "save" => {
+                        //Send the signal to the front end
+                        let _ = app_handle.emit("save-trip", ());
+                    }
+                    "saveas" => {
+                        //Send the signal to the front end
+                        let _ = app_handle.emit("save-as-trip", ());
+                    }
+                    "loadtrip" => {
+                        //Send the signal to the front end
+                        let _ = app_handle.emit("load-trip", ());
+                    }
+                    "opentrips" => {
+                        if let Ok(app_dir) = app_handle.path().app_data_dir() {
+                            let trips_dir = app_dir.join("trips");
+                            
+                            if !trips_dir.exists() {
+                                let _ = std::fs::create_dir_all(&trips_dir);
+                            }
+                            
+                            let _ = app_handle.opener().open_path(trips_dir.to_string_lossy().to_string(), None::<&str>);
+                        }
                     }
                     _ => {
                         let themes = [

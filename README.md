@@ -142,9 +142,10 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Refined LeftPanel card UI (tactical styling, unified action bar, clickable coordinates).
   - [X] Implemented the actual editing logic inside the `EditPopup` (changing names/descriptions and saving to context).
   - [X] Built dynamic Trip Settings popup to customize the Trip Name and Summary.
-  - [ ] Implement drag-and-drop reordering for the list of stops.
-  - [ ] Add Save/Load functionality to persist the tactical plan to a local file.
+  - [X] Implement drag-and-drop reordering for the list of stops.
+  - [X] Add Save/Load functionality to persist the tactical plan to a local file.
   - [X] Added "New Trip" feature via Tauri native menu, including a native warning dialog to safely clear the plan.
+  - [X] Added dynamic map swooping (flyTo) when clicking waypoint cards or the edit button in the sidebar.
 - [ ] **Routing & Pathfinding**
   - [ ] Integrate routing engine (Rust backend via Tauri or frontend API).
   - [ ] Calculate routes between the ordered points in the Trip list.
@@ -153,6 +154,18 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [ ] Render intermediate route waypoints on the map.
   - [ ] Allow user to click and drag waypoints to alter the route.
   - [ ] Dynamically recalculate and redraw the route on drag release.
+- [ ] **Help Menu**
+  - [ ] Add Hot Keys and Hotkey menus to show the hotkeys
+  - [ ] Add Loading Map help or help wiki 
+  - [ ] Add point and edit details
+  - [ ] Add Routing Intructions and dragging
+
+- [ ] **Trip Stats**
+  - [ ] Add stats to the trip
+  - [ ] Add stats to the map
+
+- [ ] **Route Printing**
+- [ ] **Route Budget**
 
 
 

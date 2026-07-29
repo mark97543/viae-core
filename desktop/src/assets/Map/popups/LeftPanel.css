@@ -118,21 +118,32 @@
     transform: translateX(4px);
 }
 
+.waypoint-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+    border-style: dashed;
+}
+
 .waypoint-drag-handle {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+    border-radius: 6px;
     background: rgba(56, 189, 248, 0.1);
     border: 1px solid rgba(56, 189, 248, 0.3);
     color: #38bdf8;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 700;
     flex-shrink: 0;
     cursor: grab;
     transition: all 0.2s ease;
+}
+
+.waypoint-drag-handle:active {
+    cursor: grabbing;
 }
 
 .waypoint-drag-handle:hover {

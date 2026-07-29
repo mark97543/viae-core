@@ -26,3 +26,25 @@ pub async fn get_poi_details(
 ) -> Result<crate::maptiles::PoiDetail, String> {
     crate::maptiles::find_poi_by_coords(&app_handle, lat, lng)
 }
+
+//Save Trip
+#[tauri::command]
+pub fn save_trip_file(path: String, contents: String) -> Result<(), String> {
+    
+    // 1. Get the parent directory from the file path
+    if let Some(parent) = std::path::Path::new(&path).parent() {
+        // 2. If the folder doesn't exist, create it (and any missing parent folders above it)
+        if !parent.exists() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+    
+    // 3. Write the file safely knowing the folder exists!
+    std::fs::write(&path, contents).map_err(|e| e.to_string())
+}
+
+//Load Trip
+#[tauri::command]
+pub fn load_trip_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(&path).map_err(|e| e.to_string())
+}
