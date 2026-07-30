@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { useWaypoints } from '../../../context/WaypointContext';
 
-const MarkerPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay: (value: boolean) => void, data: { lat: number, lng: number } | null }) => {
+const MarkerPopup = ({ display, setDisplay, data, onAdd }: { display: boolean, setDisplay: (value: boolean) => void, data: { lat: number, lng: number } | null, onAdd?: () => void }) => {
     const [copied, setCopied] = useState(false);
     const { addWaypoint } = useWaypoints();
 
@@ -16,6 +16,7 @@ const MarkerPopup = ({ display, setDisplay, data }: { display: boolean, setDispl
             type: 'marker',
             description: 'A user-defined marker on the map.',
         });
+        if (onAdd) onAdd();
     };
 
     const handleCopy = () => {

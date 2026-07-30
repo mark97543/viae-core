@@ -10,6 +10,7 @@ export function useTacticalMap(
 ) {
     const mapInstance = useRef<Map | null>(null);
     const searchMarker = useRef<Marker | null>(null);
+    const geoJsonRef = useRef<any>(null);
     const { waypoints, routeData, editWaypoint } = useWaypoints();
 
     const [isMapReady, setIsMapReady] = useState(false);
@@ -281,6 +282,7 @@ export function useTacticalMap(
                 }
             }))
         };
+        geoJsonRef.current = geojson;
 
         // 3. Update or Add GeoJSON Source
         const existingSource = map.getSource(sourceId) as any;
@@ -338,7 +340,7 @@ export function useTacticalMap(
                 const onMouseMove = (moveEvent: any) => {
                     const { lng, lat } = moveEvent.lngLat;
                     // Update GeoJSON source dynamically during drag
-                    const currentGeoJson = (map.getSource(sourceId) as any)._data;
+                    const currentGeoJson = geoJsonRef.current;
                     if (currentGeoJson) {
                         const updatedFeatures = currentGeoJson.features.map((f: any) => {
                             if (f.properties.id === wpId) {
@@ -349,10 +351,12 @@ export function useTacticalMap(
                             }
                             return f;
                         });
-                        (map.getSource(sourceId) as any).setData({
+                        const newGeoJson = {
                             ...currentGeoJson,
                             features: updatedFeatures
-                        });
+                        };
+                        geoJsonRef.current = newGeoJson;
+                        (map.getSource(sourceId) as any).setData(newGeoJson);
                     }
                 };
 
@@ -465,9 +469,20 @@ export function useTacticalMap(
         }
     }, [routeData, isMapReady]);
 
+    const clearSearchMarker = () => {
+        if (searchMarker.current) {
+            searchMarker.current.remove();
+            searchMarker.current = null;
+        }
+        setPoiPopup(false);
+        setMarkerPopup(false);
+        setEditPopup(false);
+    };
+
     return {
         mapInstance,
         searchMarker,
+        clearSearchMarker,
         poiPopup, setPoiPopup,
         poiData, setPoiData,
         markerPopup, setMarkerPopup,

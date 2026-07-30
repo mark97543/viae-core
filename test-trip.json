@@ -1,0 +1,77 @@
+{
+    "tripData": {
+        "name": "Washington DC Test Trip",
+        "description": "A sample trip around Washington DC to test printing, waypoints, and timelines.",
+        "startDate": "2026-08-01",
+        "startTime": "08:00"
+    },
+    "waypoints": [
+        {
+            "id": "wp_start",
+            "name": "White House (Start)",
+            "lat": 38.8977,
+            "lng": -77.0365,
+            "type": "default",
+            "description": "Starting location.",
+            "breakHours": 0,
+            "breakMinutes": 0,
+            "budget": 0
+        },
+        {
+            "id": "wp_fuel1",
+            "name": "Georgetown Fuel Stop",
+            "lat": 38.9050,
+            "lng": -77.0600,
+            "type": "fuel",
+            "description": "Fill up early.",
+            "breakHours": 0,
+            "breakMinutes": 15,
+            "budget": 45
+        },
+        {
+            "id": "wp_food1",
+            "name": "Lunch at Dupont Circle",
+            "lat": 38.9096,
+            "lng": -77.0434,
+            "type": "food",
+            "description": "Great burgers.",
+            "breakHours": 1,
+            "breakMinutes": 0,
+            "budget": 25
+        },
+        {
+            "id": "wp_hotel",
+            "name": "Capitol Hill Lodge",
+            "lat": 38.8890,
+            "lng": -77.0050,
+            "type": "lodging",
+            "description": "Staying here for the night.",
+            "breakHours": 0,
+            "breakMinutes": 0,
+            "budget": 120,
+            "isOvernight": true
+        },
+        {
+            "id": "wp_scenic",
+            "name": "Lincoln Memorial",
+            "lat": 38.8893,
+            "lng": -77.0502,
+            "type": "attraction",
+            "description": "Take some pictures here.",
+            "breakHours": 0,
+            "breakMinutes": 30,
+            "budget": 0
+        },
+        {
+            "id": "wp_end",
+            "name": "Navy Yard Destination",
+            "lat": 38.8740,
+            "lng": -76.9950,
+            "type": "default",
+            "description": "End of the road.",
+            "breakHours": 0,
+            "breakMinutes": 0,
+            "budget": 0
+        }
+    ]
+}

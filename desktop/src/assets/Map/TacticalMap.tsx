@@ -11,6 +11,7 @@ import { parseCoordinates } from './mapUtils';
 import { useTacticalMap } from './hooks/useTacticalMap';
 import { useWaypoints } from '../../context/WaypointContext';
 import LeftPanel from './popups/LeftPanel';
+import PrintModal from './popups/PrintModal';
 import EditPopup from './popups/EditPopup';
 import TitlePopup from './popups/TitlePopup';
 import RangeFinderTool from './popups/RangeFinderTool';
@@ -28,6 +29,9 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const [search, setSearch] = useState('');
     const [titlePopup, setTitlePopup] = useState(false);
     const [rangeFinderOpen, setRangeFinderOpen] = useState(false);
+    
+    // Print State
+    const [printModalOpen, setPrintModalOpen] = useState(false);
 
     const { tripData, setTripData, waypoints } = useWaypoints();
 
@@ -39,7 +43,8 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         markerPopup, setMarkerPopup,
         markerData, setMarkerData,
         editPopup, setEditPopup,
-        editData, setEditData
+        editData, setEditData,
+        clearSearchMarker
     } = useTacticalMap(mapContainer, activeMapFile, theme);
 
     const flyToWaypoint = (lat: number, lng: number) => {
@@ -101,6 +106,8 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         }
     };
 
+
+
     useEffect(() => {
         const unlisten = listen<string>('change-theme', (event) => {
             setTheme(event.payload);
@@ -140,8 +147,8 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     {THEMES.map(t => <option key={t} value={t} className="bg-neutral-800 text-white">{t}</option>)}
                 </select>
             </div>
-            <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} />
-            <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} />
+            <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} onAdd={clearSearchMarker} />
+            <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} onAdd={clearSearchMarker} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
             <RangeFinderTool display={rangeFinderOpen} setDisplay={setRangeFinderOpen} mapInstance={mapInstance} />
             <SearchBar search={search} setSearch={setSearch} onSearch={executeSearch} poiOpen={poiPopup || markerPopup || editPopup || titlePopup} />
@@ -160,10 +167,12 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     setMarkerPopup(false);
                     setEditPopup(false);
                 }}
+                openPrint={() => setPrintModalOpen(true)}
                 flyToWaypoint={flyToWaypoint}
                 zoomToTrip={() => zoomToTrip(waypoints)}
             />
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
+            <PrintModal display={printModalOpen} setDisplay={setPrintModalOpen} />
         </div>
     )
 }

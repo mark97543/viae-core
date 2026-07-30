@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useWaypoints } from '../../../context/WaypointContext';
 import * as turf from '@turf/turf';
@@ -12,17 +12,11 @@ interface RangeFinderToolProps {
 }
 
 export default function RangeFinderTool({ display, setDisplay, mapInstance }: RangeFinderToolProps) {
-    const { waypoints, routeData } = useWaypoints();
+    const { waypoints, routeData, addWaypoint } = useWaypoints();
     const [fuelRange, setFuelRange] = useState<number>(200); // Default 200 miles
-    const markersRef = useRef<maplibregl.Marker[]>([]);
-
     const clearMap = () => {
         const map = mapInstance.current;
         if (!map) return;
-
-        // Clear markers
-        markersRef.current.forEach(m => m.remove());
-        markersRef.current = [];
 
         // Clear layers/sources
         if (map.getLayer('range-finder-buffer')) map.removeLayer('range-finder-buffer');
@@ -31,6 +25,14 @@ export default function RangeFinderTool({ display, setDisplay, mapInstance }: Ra
         if (map.getSource('range-finder-green-buffer-source')) map.removeSource('range-finder-green-buffer-source');
         if (map.getLayer('range-finder-green-circles')) map.removeLayer('range-finder-green-circles');
         if (map.getSource('range-finder-green-source')) map.removeSource('range-finder-green-source');
+        
+        if (map.getLayer('range-finder-pois-layer')) map.removeLayer('range-finder-pois-layer');
+        if (map.getSource('range-finder-pois-source')) map.removeSource('range-finder-pois-source');
+        
+        if ((map as any)._rangeFinderPoiClick) {
+            map.off('click', 'range-finder-pois-layer', (map as any)._rangeFinderPoiClick);
+            (map as any)._rangeFinderPoiClick = null;
+        }
     };
 
     // Auto-clear when closed
@@ -202,17 +204,79 @@ export default function RangeFinderTool({ display, setDisplay, mapInstance }: Ra
                     }
                 });
 
-                // Draw yellow markers for found POIs
-                uniquePois.forEach(poi => {
-                    const el = document.createElement('div');
-                    el.className = 'range-finder-yellow-marker';
-                    
-                    const marker = new maplibregl.Marker({ element: el })
-                        .setLngLat([poi.lng, poi.lat])
-                        .addTo(map);
-                    
-                    markersRef.current.push(marker);
+                // Render yellow markers for found POIs as a WebGL symbol layer for 0ms lag
+                const poiFeatures = Array.from(uniquePois.values()).map(poi => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [poi.lng, poi.lat] },
+                    properties: {
+                        id: poi.id,
+                        name: poi.name || 'Gas Station',
+                        lat: poi.lat,
+                        lng: poi.lng,
+                    }
+                }));
+
+                map.addSource('range-finder-pois-source', {
+                    type: 'geojson',
+                    data: { type: 'FeatureCollection', features: poiFeatures as any }
                 });
+
+                // Generate yellow icon if not exists
+                if (!map.hasImage('range-finder-fuel-icon')) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 40;
+                    canvas.height = 40;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.scale(2, 2); // 20x20
+                    ctx.beginPath();
+                    ctx.arc(10, 10, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#eab308'; // yellow-500
+                    ctx.fill();
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                    map.addImage('range-finder-fuel-icon', ctx.getImageData(0, 0, 40, 40) as any, { pixelRatio: 2 } as any);
+                }
+
+                map.addLayer({
+                    id: 'range-finder-pois-layer',
+                    type: 'symbol',
+                    source: 'range-finder-pois-source',
+                    layout: {
+                        'icon-image': 'range-finder-fuel-icon',
+                        'icon-allow-overlap': true,
+                        'icon-ignore-placement': true
+                    }
+                });
+
+                // Interaction
+                map.on('mouseenter', 'range-finder-pois-layer', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'range-finder-pois-layer', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+
+                // Click to add fuel waypoint
+                const onPoiClick = (e: any) => {
+                    if (!e.features || e.features.length === 0) return;
+                    e.preventDefault();
+                    const f = e.features[0];
+                    const props = f.properties;
+                    addWaypoint({
+                        name: props.name,
+                        lat: props.lat,
+                        lng: props.lng,
+                        type: 'fuel',
+                        description: 'Added via Range Finder'
+                    });
+                };
+
+                map.on('click', 'range-finder-pois-layer', onPoiClick);
+                
+                // Keep reference to clean up event listener
+                (map as any)._rangeFinderPoiClick = onPoiClick;
+
             }).catch(console.error);
             
             // Zoom to fit all search areas

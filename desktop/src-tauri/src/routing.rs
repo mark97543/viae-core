@@ -111,20 +111,39 @@ fn merge_chunk_into_graph(active_graph: &mut RoutingGraph, chunk: &RoutingGraph)
     }
 }
 
-// This function finds the closest node in a graph to a given lat/lon
 fn find_closest_node(graph: &RoutingGraph, target_lat: f64, target_lon: f64) -> Option<petgraph::graph::NodeIndex> {
     let mut closest_node = None;
     let mut min_distance = f64::MAX;
 
+    // First try: Only snap to highly connected nodes (>= 2 edges) to avoid dead ends and islands
     for node in graph.graph.node_indices() {
-        if let Some(&(lat, lon)) = graph.graph.node_weight(node) {
-            let dist = haversine(lat, lon, target_lat, target_lon);
-            if dist < min_distance {
-                min_distance = dist;
-                closest_node = Some(node);
+        if graph.graph.edges(node).count() >= 2 {
+            if let Some(&(lat, lon)) = graph.graph.node_weight(node) {
+                let dist = haversine(lat, lon, target_lat, target_lon);
+                if dist < min_distance {
+                    min_distance = dist;
+                    closest_node = Some(node);
+                }
             }
         }
     }
+    
+    // Fallback: if no highly connected nodes exist (unlikely), try any connected node
+    if closest_node.is_none() {
+        min_distance = f64::MAX;
+        for node in graph.graph.node_indices() {
+            if graph.graph.edges(node).count() >= 1 {
+                if let Some(&(lat, lon)) = graph.graph.node_weight(node) {
+                    let dist = haversine(lat, lon, target_lat, target_lon);
+                    if dist < min_distance {
+                        min_distance = dist;
+                        closest_node = Some(node);
+                    }
+                }
+            }
+        }
+    }
+    
     closest_node
 }
 
@@ -207,7 +226,7 @@ pub fn calculate_route(
         let g_cost = *distances.get(&node).unwrap_or(&f64::MAX);
 
         for edge in active_graph.graph.edges(node) {
-            let next = edge.target();
+            let next = if edge.source() == node { edge.target() } else { edge.source() };
             let weight = edge.weight();
             
             // Time = (Distance in miles / Speed in mph) * 3600 seconds

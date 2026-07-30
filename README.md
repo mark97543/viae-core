@@ -160,73 +160,33 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [ ] Add Loading Map help or help wiki 
   - [ ] Add point and edit details
   - [ ] Add Routing Intructions and dragging
+  - [ ] Rangefinder help instruction 
 
 - [X] **Trip Stats**
   - [X] Add stats to the trip
   - [X] Add stats to the map
   - [X] Calculate ETA Arrival/Departure timeline with Waypoint Break Durations
 
-- [ ] **Route Printing**
+- [X] **Route Printing & Native PDF Export**
+  - High-contrast B&W tactical layout optimized for physical paper backup in field notebooks.
+  - Supports multiple physical paper sizes: **Field Notes (3.0" x 5.0")**, **Custom Journal (5.0" x 7.75")**, and standard **Letter (8.5" x 11.0")**.
+  - Dedicated Cover Page featuring Trip Title, Description, and Summary Data Table (Total Distance, Duration, Dates, and Total Budget).
+  - Discrete card chunking to guarantee waypoints sit cleanly on individual pages without splitting text or borders across page breaks.
+  - Formatted horizontal leg connectors with distance, duration, and overnight stop indicators.
+  - Individual stop budget tracking (`| BUDGET: $X.00`).
+  - Native WebKit SVG rendering (`html-to-image` + `jsPDF`) for pixel-perfect font metrics, crisp typography, and framed solid black borders.
+  - Direct desktop export via `@tauri-apps/plugin-fs`, automatically saving to `~/Desktop/Itinerary_[size].pdf` and opening in the OS default PDF viewer.
+
 - [X] **Route Budget**
 - [ ] **Misc**
-  - [X] When a trip is loaded zomm into it
+  - [X] When a trip is loaded zoom into it
   - [X] Trip overview to zoom out see whole trip 
   - [X] Modify the waypoint buttons to thin out the div and have a cleaner look.
   - [X] Multiday Routes 
   - [X] Waypoint types (i.e. Fuel, Food, Lodging, Attraction, Shaping)
-  - [ ] Range Finder
+  - [X] Range Finder
   - [X] Different color Lines for different days
   - [X] Route Budget
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Future / Roadmap
 - [ ] **3D Terrain-RGB Support**

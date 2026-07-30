@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { useWaypoints } from '../../../context/WaypointContext';
 
-const POIPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay: (value: boolean) => void, data: any }) => {
+const POIPopup = ({ display, setDisplay, data, onAdd }: { display: boolean, setDisplay: (value: boolean) => void, data: any, onAdd?: () => void }) => {
     const [copied, setCopied] = useState(false);
     const { addWaypoint } = useWaypoints();
 
@@ -16,6 +16,7 @@ const POIPopup = ({ display, setDisplay, data }: { display: boolean, setDisplay:
             type: 'poi',
             description: data.description,
         });
+        if (onAdd) onAdd();
     };
 
     const handleCopy = () => {
