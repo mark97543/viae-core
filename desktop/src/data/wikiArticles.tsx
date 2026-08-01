@@ -49,6 +49,41 @@ export const WIKI_CATEGORIES: ArticleCategory[] = [
         )
     },
     {
+        id: 'mobile-navus',
+        icon: '📱',
+        title: 'Mobile Client (Navus) & USB Sync',
+        subtitle: 'USB device auto-recognition, offline map vault sync, and dedicated handlebar head unit provisioning',
+        keywords: ['mobile', 'navus', 'android', 'usb', 'adb', 'kiosk', 'airplane mode', 'autostart', 'sync', 'vault', 'head unit'],
+        content: (
+            <div className="help-wiki-article">
+                <p className="help-wiki-text">
+                    <strong>Version 0.5 Navus</strong> introduces the Android mobile client architecture for off-grid motorcycle/bike handlebar navigation.
+                </p>
+
+                <h3 className="help-wiki-section-h3">1. USB Device Auto-Recognition</h3>
+                <p className="help-wiki-text">
+                    Connect your Android phone to your workstation PC via USB (with File Transfer or ADB enabled). Open <strong>Mobile &gt; USB Sync &amp; Device Vault...</strong> in the top menu. The workstation automatically recognizes connected Android hardware.
+                </p>
+
+                <h3 className="help-wiki-section-h3">2. 1-Click Offline Map Vault Sync</h3>
+                <p className="help-wiki-text">
+                    In the <strong>Mobile &gt; USB Sync</strong> tab, click <strong>📁 Copy Entire Map Vault to Phone (USB)</strong>. The desktop app streams your compiled vector map archive (<code className="help-wiki-code">.mbtiles</code>), POI search database (<code className="help-wiki-code">geocoder.db</code>), and routing networks directly into <code className="help-wiki-code">/sdcard/IterViaeNavus/maps/</code> over USB.
+                </p>
+
+                <h3 className="help-wiki-section-h3">3. Handlebar Head Unit Provisioning</h3>
+                <p className="help-wiki-text">
+                    Select <strong>Mobile &gt; Provision Handlebar Head Unit...</strong> to convert any phone into a dedicated off-grid handlebar navigation computer:
+                </p>
+                <ul className="help-wiki-list">
+                    <li>🔒 <strong>System Home Kiosk Launcher:</strong> Sets Iter Viae Navus as default System Home Launcher app. Pressing Home or booting powers up only Navus.</li>
+                    <li>📡 <strong>Cellular Radio Shutdown:</strong> Forces Airplane Mode ON and deactivates cell towers while locking hardware GPS and Wi-Fi active.</li>
+                    <li>📺 <strong>Immersive Edge-to-Edge Fullscreen:</strong> Hides top status bars and bottom navigation bars for 100% map visibility.</li>
+                    <li>⚡ <strong>Unrestricted Battery Whitelist:</strong> Bypasses Android device idle throttling to keep GPS tracking active when unplugged from USB power.</li>
+                </ul>
+            </div>
+        )
+    },
+    {
         id: 'map-tools',
         icon: '🗺️',
         title: 'Map Tools & Tile Management',
@@ -63,8 +98,8 @@ export const WIKI_CATEGORIES: ArticleCategory[] = [
                 <h3 className="help-wiki-section-h3">Importing New Maps</h3>
                 <ol className="help-wiki-list">
                     <li>Open <strong>Map Tools</strong> from the top native application menu bar.</li>
-                    <li>Select <strong>Import</strong> to open the local Map Processing Tool workspace.</li>
-                    <li>Select your raw compiled <code className="help-wiki-code">.mbtiles</code> or OpenStreetMap extracts to process local vector layers and gazetteer database entries.</li>
+                    <li>Select <strong>Import Map Archive (.pbf)...</strong> to open the local Map Processing Tool workspace.</li>
+                    <li>Select your raw compiled <code className="help-wiki-code">.pbf</code> OpenStreetMap extracts to process local vector layers and gazetteer database entries.</li>
                 </ol>
 
                 <h3 className="help-wiki-section-h3">Switching Basemap Themes</h3>

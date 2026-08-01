@@ -5,6 +5,7 @@ export interface HotkeyItem {
 
 export const HOTKEY_ITEMS: HotkeyItem[] = [
     { key: 'F1', action: 'Open User Guide & Tactical Wiki' },
+    { key: 'Ctrl + U', action: 'Open Mobile USB Sync & Device Vault' },
     { key: 'Ctrl + N', action: 'Create New Trip (Clear active plan with prompt)' },
     { key: 'Ctrl + O', action: 'Load Saved Trip File' },
     { key: 'Ctrl + S', action: 'Save Current Trip File' },

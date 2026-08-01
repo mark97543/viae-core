@@ -198,9 +198,16 @@ This version builds the mobile client architecture (Android) to act as our off-g
 - [X] **Android Project Initialization**
   - [X] Scaffold React Native / Expo workspace structured for Android (API 24+ minimum).
   - [X] Implement high-contrast dark-mode theme matching the desktop Tailwind aesthetic.
-- [X] Set up recognition as usbdrive our desktop app will reconize
-- [X] Add option to desktop app to load map to phone (USB)
-- [X] Add option to install iterviae into android as a background service that can autostart and run without USB connected or power connected. This will also put phone in laptopmode onlny allowinf gps and wifi 
+- [X] **USB Phone Recognition & Storage Vault Detection**
+  - [X] Tauri Rust backend auto-recognizes connected Android hardware over USB/ADB.
+- [X] **1-Click Offline Map Vault Sync**
+  - [X] Dedicated desktop `Mobile` menu option to stream full map vault (`.mbtiles`, routing networks, POI index) to `/sdcard/IterViaeNavus/maps/`.
+- [X] **Handlebar Head Unit Provisioning & Kiosk Lockdown**
+  - [X] Install standalone offline APK bundle directly to connected hardware.
+  - [X] Lock Iter Viae Navus as default System Home Launcher (Kiosk Mode).
+  - [X] Deactivate cellular radios (Airplane Mode ON, Mobile Data OFF, hardware GPS & Wi-Fi active).
+  - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
+  - [X] Bypass device idle battery throttling for continuous background GPS tracking.
 
 
 
