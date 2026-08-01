@@ -19,11 +19,20 @@ export function setupMapLibre() {
     setWorkerUrl(workerUrl);
 
     addProtocol('mbtiles', async (params) => {
-        const url = new URL(params.url);
-        const parts = url.pathname.split('/').filter(Boolean);
+        const cleanUrl = params.url.replace(/^mbtiles:\/\//, '');
+        const parts = cleanUrl.split('/').filter(Boolean);
+
+        if (parts.length > 0 && isNaN(parseInt(parts[0]))) {
+            parts.shift();
+        }
+
         const z = parseInt(parts[0]);
         const x = parseInt(parts[1]);
         const y = parseInt(parts[2]);
+
+        if (isNaN(z) || isNaN(x) || isNaN(y)) {
+            return { data: new ArrayBuffer(0) };
+        }
 
         try {
             const data = await invoke<number[]>('get_map_tile', { z, x, y });

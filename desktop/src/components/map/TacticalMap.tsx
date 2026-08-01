@@ -38,9 +38,10 @@ function parseCoordinates(input: string): { lat: number; lng: number } | null {
 
 interface TacticalMapProps {
     activeMapFile?: string;
+    readOnly?: boolean;
 }
 
-export default function TacticalMap({ activeMapFile = "default.mbtiles" }: TacticalMapProps) {
+export default function TacticalMap({ activeMapFile = "default.mbtiles", readOnly = false }: TacticalMapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const [theme, setTheme] = useState('osm-bright');
     const [search, setSearch] = useState('');
@@ -181,6 +182,14 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
+
+    if (readOnly) {
+        return (
+            <div className="tactical-map-container">
+                <div ref={mapContainer} className="tactical-map" />
+            </div>
+        );
+    }
 
     return (
         <div className="tactical-map-container">

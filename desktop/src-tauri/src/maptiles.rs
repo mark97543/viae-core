@@ -4,6 +4,40 @@ use tauri::{AppHandle, Manager};
 use rusqlite::{Connection, params, OptionalExtension};
 use serde::{Serialize, Deserialize};
 
+fn find_active_mbtiles_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let mut candidate_dirs = Vec::new();
+
+    if let Ok(app_dir) = app_handle.path().app_data_dir() {
+        let maps_dir = app_dir.join("maps");
+        let _ = fs::create_dir_all(&maps_dir);
+        candidate_dirs.push(maps_dir);
+        candidate_dirs.push(app_dir);
+    }
+
+    candidate_dirs.push(PathBuf::from("/sdcard/IterViaeNavus/maps"));
+    candidate_dirs.push(PathBuf::from("/sdcard/IterViaeNavus"));
+    candidate_dirs.push(PathBuf::from("/storage/emulated/0/IterViaeNavus/maps"));
+    candidate_dirs.push(PathBuf::from("/storage/emulated/0/IterViaeNavus"));
+    candidate_dirs.push(PathBuf::from("/storage/emulated/0/Android/data/com.viae/files/maps"));
+    candidate_dirs.push(PathBuf::from("/storage/emulated/0/Android/data/com.viae/files"));
+    candidate_dirs.push(PathBuf::from("/data/data/com.viae/files"));
+
+    for dir in candidate_dirs {
+        if dir.exists() {
+            if let Ok(entries) = fs::read_dir(&dir) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("mbtiles") {
+                        return Ok(path);
+                    }
+                }
+            }
+        }
+    }
+
+    Err("No .mbtiles map files found in any vault directory.".into())
+}
+
 // Function to automatically find the local .mbtiles file and extract a single tile blob
 pub fn fetch_local_tile(
     app_handle: &AppHandle,
@@ -11,35 +45,9 @@ pub fn fetch_local_tile(
     x: u32,
     y: u32,
 ) -> Result<Vec<u8>, String> {
-    // 1. Resolve the application's secure data directory
-    let app_dir = app_handle
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?;
+    let db_path = find_active_mbtiles_path(app_handle)?;
 
-    let maps_dir = app_dir.join("maps");
-
-    if !maps_dir.exists() {
-        return Err(format!("Maps directory not found at: {:?}", maps_dir));
-    }
-
-    // 2. Automatically scan the maps folder to find the first available .mbtiles file
-    let mut target_mbtiles: Option<PathBuf> = None;
-    
-    let entries = fs::read_dir(&maps_dir).map_err(|e| e.to_string())?;
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.extension().and_then(|s| s.to_str()) == Some("mbtiles") {
-            target_mbtiles = Some(path);
-            break; // Grab the first valid map file found
-        }
-    }
-
-    let db_path = target_mbtiles.ok_or_else(|| {
-        format!("No .mbtiles map files found inside {:?}", maps_dir)
-    })?;
-
-    // 3. Open Connection to the SQLite .mbtiles container
+    // Open Connection to the SQLite .mbtiles container
     let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
 
     // Note: MBTiles use TMS coordinate systems for Y rows, 
@@ -50,7 +58,7 @@ pub fn fetch_local_tile(
         .prepare("SELECT tile_data FROM tiles WHERE zoom_level = ?1 AND tile_column = ?2 AND tile_row = ?3")
         .map_err(|e| e.to_string())?;
 
-    // Handle missing tiles gracefully (e.g. empty oceans) by returning an empty vector instead of throwing an error
+    // Handle missing tiles gracefully by returning an empty vector
     let tile_data: Option<Vec<u8>> = stmt
         .query_row(params![z, x, tms_y], |row| row.get(0))
         .optional()
@@ -60,22 +68,8 @@ pub fn fetch_local_tile(
 }
 
 //Function to pull map metadata
-pub fn get_map_metadata(app_handle:&tauri::AppHandle)->Result <serde_json::Value,String>{
-    let app_dir = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
-    let maps_dir = app_dir.join("maps");
-
-    //scan for the active mdtile file just like done for tiles
-    let mut target_mbtiles = None;
-    if let Ok(entries) = std::fs::read_dir(&maps_dir){
-        for entry in entries.flatten(){
-            let path = entry.path();
-            if path.extension().and_then(|s| s.to_str()) == Some("mbtiles"){
-                target_mbtiles = Some(path);
-                break;
-            }
-        }
-    }
-    let db_path = target_mbtiles.ok_or("No mbtiles found")?;
+pub fn get_map_metadata(app_handle: &tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let db_path = find_active_mbtiles_path(app_handle)?;
     let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn.prepare("SELECT name, value FROM metadata")

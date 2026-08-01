@@ -1,9 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import './MobileNavApp.css';
-import { setupMapLibre } from '../../utils/mapConfig';
-import { Map as MapLibreMap, NavigationControl } from 'maplibre-gl';
-
-setupMapLibre();
+import TacticalMap from '../map/TacticalMap';
 
 type ScreenView = 'dashboard' | 'navigation' | 'qrscanner';
 
@@ -22,61 +19,6 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
     'virginia-260723.mbtiles',
     'maryland-260723.mbtiles',
   ]);
-
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<MapLibreMap | null>(null);
-
-  useEffect(() => {
-    if (currentScreen !== 'navigation' || !mapContainerRef.current) return;
-
-    // Use air-gapped local mbtiles:// protocol from Rust SQLite engine
-    const map = new MapLibreMap({
-      container: mapContainerRef.current,
-      style: {
-        version: 8,
-        name: 'Air-Gapped Tactical Mobile',
-        sources: {
-          'local-mbtiles': {
-            type: 'vector',
-            tiles: ['mbtiles://{z}/{x}/{y}'],
-            minzoom: 0,
-            maxzoom: 14,
-          },
-        },
-        layers: [
-          {
-            id: 'background',
-            type: 'background',
-            paint: { 'background-color': '#0f172a' },
-          },
-          {
-            id: 'water-layer',
-            type: 'fill',
-            source: 'local-mbtiles',
-            'source-layer': 'water',
-            paint: { 'fill-color': '#0284c7' },
-          },
-          {
-            id: 'roads-layer',
-            type: 'line',
-            source: 'local-mbtiles',
-            'source-layer': 'transportation',
-            paint: { 'line-color': '#94a3b8', 'line-width': 1.5 },
-          },
-        ],
-      },
-      center: [-77.0369, 38.9072],
-      zoom: 12,
-      pitch: 20,
-    });
-
-    map.addControl(new NavigationControl({ showCompass: true, showZoom: true }), 'top-right');
-    mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-    };
-  }, [currentScreen]);
 
   return (
     <div className="mobile-nav-container">
@@ -193,7 +135,7 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
       )}
 
       {currentScreen === 'navigation' && (
-        /* Full-Screen Mobile Map Viewport */
+        /* Full-Screen Mobile Map Viewport using TacticalMap */
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
           {/* HUD Telemetry Top Bar */}
           <div className="mobile-hud-overlay">
@@ -218,12 +160,9 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
             </div>
           </div>
 
-          {/* Air-Gapped Map Viewport */}
-          <div ref={mapContainerRef} className="mobile-map-viewport" />
-
-          {/* Bottom Vault Badge */}
-          <div className="mobile-vault-badge">
-            VAULT: {activeMap} (AIR-GAPPED)
+          {/* Full Tactical Map Engine (Read-Only View) */}
+          <div className="mobile-map-viewport">
+            <TacticalMap activeMapFile={activeMap} readOnly={true} />
           </div>
         </div>
       )}

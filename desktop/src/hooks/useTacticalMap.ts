@@ -43,16 +43,24 @@ export function useTacticalMap(
                 };
             }
 
+            // Remove external online sprite/glyph dependencies for air-gapped operation
+            delete style.sprite;
+            delete style.glyphs;
+
             map = new Map({
                 container: mapContainer.current!,
                 style: style,
-                center: [-98.583333, 39.833333],
-                zoom: 14,
+                center: [-77.0369, 38.9072],
+                zoom: 12.5,
                 pitch: 0,
                 bearing: 0
             });
             mapInstance.current = map;
             setIsMapReady(true);
+
+            setTimeout(() => {
+                map?.resize();
+            }, 300);
 
             map.on('styleimagemissing', (e) => {
                 const id = e.id;
@@ -67,18 +75,34 @@ export function useTacticalMap(
             });
 
             invoke<Record<string, string>>('get_map_metadata').then((meta) => {
-                if (meta && meta.center && map) {
-                    const coords = meta.center.split(',').map(Number);
-                    if (coords.length >= 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-                        const [lng, lat, zoom = 10] = coords;
-                        map.flyTo({
-                            center: [lng, lat],
-                            zoom: zoom,
-                            essential: true
-                        });
+                console.log("Map metadata received:", meta);
+                if (meta && map) {
+                    if (meta.bounds) {
+                        const b = meta.bounds.split(',').map(Number);
+                        if (b.length === 4 && !b.some(isNaN)) {
+                            console.log("Fitting bounds to:", b);
+                            map.fitBounds([[b[0], b[1]], [b[2], b[3]]], {
+                                padding: 20,
+                                maxZoom: 14,
+                                essential: true
+                            });
+                            return;
+                        }
+                    }
+                    if (meta.center) {
+                        const coords = meta.center.split(',').map(Number);
+                        if (coords.length >= 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+                            const [lng, lat, zoom = 10] = coords;
+                            console.log("Flying to center:", lng, lat, zoom);
+                            map.flyTo({
+                                center: [lng, lat],
+                                zoom: zoom,
+                                essential: true
+                            });
+                        }
                     }
                 }
-            });
+            }).catch(err => console.error("Metadata fetch error:", err));
 
             invoke<string>('load_routing_graph').then((res) => {
                 console.log(res);

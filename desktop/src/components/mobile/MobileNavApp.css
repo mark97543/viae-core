@@ -309,3 +309,11 @@
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
+
+/* Hide desktop left panel inside mobile map viewport */
+.mobile-map-viewport .left-panel {
+    display: none !important;
+}
+.mobile-map-viewport .search-bar-container {
+    top: 12px !important;
+}
