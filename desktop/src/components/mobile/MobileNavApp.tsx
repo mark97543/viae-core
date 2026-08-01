@@ -170,27 +170,6 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
                 </div>
               </div>
 
-              {/* Head Unit Configuration Card */}
-              <div className="mobile-card">
-                <div className="mobile-card-title">HANDLEBAR HEAD UNIT CONFIGURATION</div>
-                <div className="mobile-config-row">
-                  <span className="mobile-config-label">ORIENTATION:</span>
-                  <span className="mobile-config-val-success">LANDSCAPE LOCKED</span>
-                </div>
-                <div className="mobile-config-row">
-                  <span className="mobile-config-label">RADIO MODE:</span>
-                  <span className="mobile-config-val-success">AIR-GAPPED (GPS & WI-FI ONLY)</span>
-                </div>
-                <div className="mobile-config-row">
-                  <span className="mobile-config-label">POWER / IDLE OVERRIDE:</span>
-                  <span className="mobile-config-val-success">BATTERY WHITELISTED</span>
-                </div>
-                <div className="mobile-config-row">
-                  <span className="mobile-config-label">STANDALONE MOUNT:</span>
-                  <span className="mobile-config-val">UNPLUGGED HANDLEBAR READY</span>
-                </div>
-              </div>
-
               {/* Vault Info Card */}
               <div className="mobile-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
