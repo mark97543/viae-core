@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, PermissionsAndroid, Platform, Linking } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../theme/theme';
+import * as FileSystem from 'expo-file-system/legacy';
 
 interface DashboardScreenProps {
   onOpenScanner: () => void;
@@ -8,6 +9,129 @@ interface DashboardScreenProps {
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenScanner, onOpenMap }) => {
+  const [mapFiles, setMapFiles] = useState<string[]>([]);
+  const [activeMap, setActiveMap] = useState<string>('Scanning Vault...');
+  const [resolvedPath, setResolvedPath] = useState<string>('/sdcard/IterViaeNavus/maps/');
+
+  const requestStoragePermission = async (): Promise<boolean> => {
+    if (Platform.OS !== 'android') return true;
+    try {
+      if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
+        return true;
+      }
+      const permissions: (typeof PermissionsAndroid.PERMISSIONS[keyof typeof PermissionsAndroid.PERMISSIONS])[] = [];
+      if (PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      }
+      if (PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+      }
+      if (permissions.length > 0) {
+        await PermissionsAndroid.requestMultiple(permissions);
+      }
+      return true;
+    } catch (err) {
+      console.warn("Storage permission request warning:", err);
+      return true;
+    }
+  };
+
+  const scanMapVault = useCallback(async () => {
+    setActiveMap('Scanning Vault...');
+    try {
+      await requestStoragePermission();
+
+      const appPrivateDir = FileSystem.documentDirectory ? `${FileSystem.documentDirectory}maps/` : null;
+      const androidAppDataDir = 'file:///storage/emulated/0/Android/data/com.iterviae.navus/files/maps/';
+
+      const candidatePaths = [
+        '/sdcard/IterViaeNavus/maps/',
+        '/sdcard/IterViaeNavus/maps',
+        'file:///sdcard/IterViaeNavus/maps/',
+        'file:///sdcard/IterViaeNavus/maps',
+        '/storage/emulated/0/IterViaeNavus/maps/',
+        '/storage/emulated/0/IterViaeNavus/maps',
+        'file:///storage/emulated/0/IterViaeNavus/maps/',
+        'file:///storage/emulated/0/IterViaeNavus/maps',
+        androidAppDataDir,
+        appPrivateDir,
+      ].filter((p): p is string => Boolean(p));
+
+      let foundDir: string | null = null;
+      let filesInDir: string[] = [];
+
+      for (const candidate of candidatePaths) {
+        try {
+          const files = await FileSystem.readDirectoryAsync(candidate);
+          if (files && files.length > 0) {
+            foundDir = candidate;
+            filesInDir = files;
+            break;
+          } else if (files && foundDir === null) {
+            foundDir = candidate;
+            filesInDir = [];
+          }
+        } catch (e) {
+          try {
+            const info = await FileSystem.getInfoAsync(candidate);
+            if (info.exists) {
+              foundDir = candidate;
+              filesInDir = await FileSystem.readDirectoryAsync(candidate);
+              if (filesInDir.length > 0) break;
+            }
+          } catch {
+            // Continue scanning candidate paths
+          }
+        }
+      }
+
+      if (foundDir) {
+        setResolvedPath(foundDir.replace('file://', ''));
+        setMapFiles(filesInDir);
+        const mbtiles = filesInDir.filter(f => f.endsWith('.mbtiles'));
+        if (mbtiles.length > 0) {
+          setActiveMap(mbtiles[0]);
+        } else {
+          setActiveMap('No .mbtiles Archives Found');
+        }
+      } else {
+        // Attempt to create vault directory at accessible locations
+        let createdDir: string | null = null;
+        const fallbackCreateDirs = [
+          'file:///sdcard/IterViaeNavus/maps/',
+          androidAppDataDir,
+          appPrivateDir,
+        ].filter((p): p is string => Boolean(p));
+
+        for (const targetDir of fallbackCreateDirs) {
+          try {
+            await FileSystem.makeDirectoryAsync(targetDir, { intermediates: true });
+            createdDir = targetDir;
+            break;
+          } catch {
+            // Check next directory to create
+          }
+        }
+
+        if (createdDir) {
+          setResolvedPath(createdDir.replace('file://', ''));
+          setActiveMap('No .mbtiles Archives Found (Created Vault)');
+          setMapFiles([]);
+        } else {
+          setResolvedPath('/sdcard/IterViaeNavus/maps/');
+          setActiveMap('No .mbtiles Archives Found');
+        }
+      }
+    } catch (err) {
+      console.log("Error scanning map vault:", err);
+      setActiveMap('No .mbtiles Archives Found');
+    }
+  }, []);
+
+  useEffect(() => {
+    scanMapVault();
+  }, [scanMapVault]);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header Banner */}
@@ -77,9 +201,27 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenScanner,
 
       {/* Vault Info */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>MAP VAULT & STORAGE</Text>
-        <Text style={styles.infoText}>Vault Path: <Text style={styles.highlight}>/sdcard/IterViaeNavus/maps/</Text></Text>
-        <Text style={styles.infoText}>Active Vector Archive: <Text style={styles.highlight}>None Loaded</Text></Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <Text style={[styles.cardTitle, { marginBottom: 0 }]}>MAP VAULT & STORAGE</Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <TouchableOpacity onPress={() => Linking.openSettings()} activeOpacity={0.7} style={styles.scanBtn}>
+              <Text style={styles.scanBtnText}>⚙️ SETTINGS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={scanMapVault} activeOpacity={0.7} style={styles.scanBtn}>
+              <Text style={styles.scanBtnText}>🔄 RESCAN</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles.infoText}>Vault Path: <Text style={styles.highlight}>{resolvedPath}</Text></Text>
+        <Text style={styles.infoText}>Active Vector Archive: <Text style={styles.highlight}>{activeMap}</Text></Text>
+        {mapFiles.length > 0 && (
+          <View style={{ marginTop: 8 }}>
+            <Text style={[styles.cardTitle, { marginBottom: 4 }]}>DETECTED VAULT FILES ({mapFiles.length}):</Text>
+            {mapFiles.map(f => (
+              <Text key={f} style={[styles.infoText, { fontSize: 11, color: COLORS.textPrimary }]}>• {f}</Text>
+            ))}
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -231,5 +373,19 @@ const styles = StyleSheet.create({
   highlight: {
     color: COLORS.primary,
     fontFamily: FONTS.monospace,
+  },
+  scanBtn: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+  },
+  scanBtnText: {
+    fontSize: 9,
+    fontWeight: FONTS.bold,
+    color: COLORS.primary,
+    letterSpacing: 0.5,
   },
 });

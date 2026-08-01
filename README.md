@@ -209,7 +209,12 @@ This version builds the mobile client architecture (Android) to act as our off-g
   - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
   - [X] Bypass device idle battery throttling for continuous background GPS tracking.
 
-  
+** Note: ** when loading map to phone the phone is giving a ,apvault storage "Permission/Storage Error" 
+- Still need to get the mobile map running
+- get mobile routing in 
+- Meed ultradark mode on cell phone
+- Wiki on instalation need to include developer options enabling. 
+
 
 
 

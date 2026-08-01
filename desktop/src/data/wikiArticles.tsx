@@ -60,9 +60,19 @@ export const WIKI_CATEGORIES: ArticleCategory[] = [
                     <strong>Version 0.5 Navus</strong> introduces the Android mobile client architecture for off-grid motorcycle/bike handlebar navigation.
                 </p>
 
+                <h3 className="help-wiki-section-h3">0. Prerequisite: Developer Options & USB Debugging</h3>
+                <p className="help-wiki-text">
+                    Before connecting your phone for head unit provisioning or USB sync:
+                </p>
+                <ol className="help-wiki-list">
+                    <li>On your phone, navigate to <strong>Settings &gt; About Phone</strong> and tap <strong>Build Number</strong> 7 times to unlock Developer Mode.</li>
+                    <li>Go to <strong>Settings &gt; System &gt; Developer Options</strong> and enable <strong>USB Debugging</strong>.</li>
+                    <li>Connect the phone via USB and tap <strong>"Always allow from this computer"</strong> when prompted.</li>
+                </ol>
+
                 <h3 className="help-wiki-section-h3">1. USB Device Auto-Recognition</h3>
                 <p className="help-wiki-text">
-                    Connect your Android phone to your workstation PC via USB (with File Transfer or ADB enabled). Open <strong>Mobile &gt; USB Sync &amp; Device Vault...</strong> in the top menu. The workstation automatically recognizes connected Android hardware.
+                    Connect your Android phone to your workstation PC via USB. Open <strong>Mobile &gt; USB Sync &amp; Device Vault...</strong> in the top menu. The workstation automatically recognizes connected Android hardware over ADB.
                 </p>
 
                 <h3 className="help-wiki-section-h3">2. 1-Click Map Vault Sync</h3>
@@ -76,6 +86,7 @@ export const WIKI_CATEGORIES: ArticleCategory[] = [
                 </p>
                 <ul className="help-wiki-list">
                     <li>🔒 <strong>System Home Kiosk Launcher:</strong> Sets Iter Viae Navus as default System Home Launcher app. Pressing Home or booting powers up only Navus.</li>
+                    <li>🔑 <strong>Auto-Granted Storage Access:</strong> Automatically grants <em>All Files Access</em> (<code className="help-wiki-code">MANAGE_EXTERNAL_STORAGE</code>) over ADB during installation so storage is fully unlocked without user interaction.</li>
                     <li>📡 <strong>Cellular Radio Shutdown:</strong> Forces Airplane Mode ON and deactivates cell towers while locking hardware GPS and Wi-Fi active.</li>
                     <li>📺 <strong>Immersive Edge-to-Edge Fullscreen:</strong> Hides top status bars and bottom navigation bars for 100% map visibility.</li>
                     <li>⚡ <strong>Unrestricted Battery Whitelist:</strong> Bypasses Android device idle throttling to keep GPS tracking active when unplugged from USB power.</li>

@@ -67,12 +67,17 @@ pub fn push_map_to_device(
         .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/IterViaeNavus/maps/"])
         .output();
 
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
+        .output();
+
     let file_name = std::path::Path::new(&file_path)
         .file_name()
         .and_then(|n| n.to_str())
         .unwrap_or("map.mbtiles");
 
-    let dest_path = format!("/sdcard/IterViaeNavus/maps/{}", file_name);
+    let dest_path_primary = format!("/sdcard/IterViaeNavus/maps/{}", file_name);
+    let dest_path_app_specific = format!("/sdcard/Android/data/com.iterviae.navus/files/maps/{}", file_name);
 
     let _ = app.emit(
         "usb-transfer-progress",
@@ -83,9 +88,14 @@ pub fn push_map_to_device(
     );
 
     let output = Command::new("adb")
-        .args(["-s", &device_id, "push", &file_path, &dest_path])
+        .args(["-s", &device_id, "push", &file_path, &dest_path_primary])
         .output()
         .map_err(|e| format!("ADB Push Failed: {}", e))?;
+
+    // Also push to app-specific directory to guarantee access on Android 11+ Scoped Storage
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "push", &file_path, &dest_path_app_specific])
+        .output();
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -123,6 +133,10 @@ pub fn push_all_maps_to_device(
         .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/IterViaeNavus/maps/"])
         .output();
 
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
+        .output();
+
     let _ = app.emit(
         "usb-transfer-progress",
         UsbTransferProgress {
@@ -137,6 +151,10 @@ pub fn push_all_maps_to_device(
         .args(["-s", &device_id, "push", &maps_dir_str, "/sdcard/IterViaeNavus/maps/"])
         .output()
         .map_err(|e| format!("ADB Sync Failed: {}", e))?;
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "push", &maps_dir_str, "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
+        .output();
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -188,7 +206,7 @@ pub fn provision_head_unit(
         );
 
         let install_res = Command::new("adb")
-            .args(["-s", &device_id, "install", "-r", &apk_path])
+            .args(["-s", &device_id, "install", "-g", "-r", &apk_path])
             .output();
 
         if let Ok(out) = install_res {
@@ -197,6 +215,17 @@ pub fn provision_head_unit(
                 println!("APK install warning: {}", err_str);
             }
         }
+
+        // Grant All Files Access and storage permissions over ADB
+        let _ = Command::new("adb")
+            .args(["-s", &device_id, "shell", "appops", "set", "com.iterviae.navus", "MANAGE_EXTERNAL_STORAGE", "allow"])
+            .output();
+        let _ = Command::new("adb")
+            .args(["-s", &device_id, "shell", "pm", "grant", "com.iterviae.navus", "android.permission.READ_EXTERNAL_STORAGE"])
+            .output();
+        let _ = Command::new("adb")
+            .args(["-s", &device_id, "shell", "pm", "grant", "com.iterviae.navus", "android.permission.WRITE_EXTERNAL_STORAGE"])
+            .output();
     }
 
     let _ = app.emit(
