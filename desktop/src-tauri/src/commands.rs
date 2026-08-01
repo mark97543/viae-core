@@ -74,6 +74,24 @@ pub fn list_saved_trips(app_handle: AppHandle) -> Result<Vec<TripFileInfo>, Stri
         candidate_dirs.push(app_dir);
     }
 
+    if let Ok(doc_dir) = app_handle.path().document_dir() {
+        candidate_dirs.push(doc_dir.join("IterViae/trips"));
+        candidate_dirs.push(doc_dir.join("viae/trips"));
+        candidate_dirs.push(doc_dir.join("trips"));
+        candidate_dirs.push(doc_dir);
+    }
+
+    if let Ok(home_dir) = app_handle.path().home_dir() {
+        candidate_dirs.push(home_dir.join("Documents/IterViae/trips"));
+        candidate_dirs.push(home_dir.join("Documents/viae/trips"));
+        candidate_dirs.push(home_dir.join("Documents/trips"));
+        candidate_dirs.push(home_dir.join("trips"));
+    }
+
+    if let Ok(curr_dir) = std::env::current_dir() {
+        candidate_dirs.push(curr_dir.join("trips"));
+    }
+
     candidate_dirs.push(std::path::PathBuf::from("/sdcard/IterViaeNavus/trips"));
     candidate_dirs.push(std::path::PathBuf::from("/sdcard/IterViaeNavus"));
     candidate_dirs.push(std::path::PathBuf::from("/storage/emulated/0/IterViaeNavus/trips"));

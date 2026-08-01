@@ -68,7 +68,7 @@ pub fn push_map_to_device(
         .output();
 
     let _ = Command::new("adb")
-        .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/storage/emulated/0/Android/data/com.viae/files/maps/"])
         .output();
 
     let file_name = std::path::Path::new(&file_path)
@@ -77,7 +77,7 @@ pub fn push_map_to_device(
         .unwrap_or("map.mbtiles");
 
     let dest_path_primary = format!("/sdcard/IterViaeNavus/maps/{}", file_name);
-    let dest_path_app_specific = format!("/sdcard/Android/data/com.iterviae.navus/files/maps/{}", file_name);
+    let dest_path_app_specific = format!("/storage/emulated/0/Android/data/com.viae/files/maps/{}", file_name);
 
     let _ = app.emit(
         "usb-transfer-progress",
@@ -92,10 +92,26 @@ pub fn push_map_to_device(
         .output()
         .map_err(|e| format!("ADB Push Failed: {}", e))?;
 
-    // Also push to app-specific directory to guarantee access on Android 11+ Scoped Storage
     let _ = Command::new("adb")
         .args(["-s", &device_id, "push", &file_path, &dest_path_app_specific])
         .output();
+
+    // Pipe file content directly into internal app sandbox via ADB run-as stdin
+    if let Ok(file_bytes) = std::fs::read(&file_path) {
+        let cat_cmd = format!("mkdir -p files/maps && cat > 'files/maps/{}'", file_name);
+        let child = Command::new("adb")
+            .args(["-s", &device_id, "shell", "run-as", "com.viae", "sh", "-c", &cat_cmd])
+            .stdin(std::process::Stdio::piped())
+            .spawn();
+
+        if let Ok(mut child_proc) = child {
+            if let Some(mut stdin) = child_proc.stdin.take() {
+                use std::io::Write;
+                let _ = stdin.write_all(&file_bytes);
+            }
+            let _ = child_proc.wait();
+        }
+    }
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -134,7 +150,7 @@ pub fn push_all_maps_to_device(
         .output();
 
     let _ = Command::new("adb")
-        .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/storage/emulated/0/Android/data/com.viae/files/maps/"])
         .output();
 
     let _ = app.emit(
@@ -145,20 +161,39 @@ pub fn push_all_maps_to_device(
         },
     );
 
-    let maps_dir_str = format!("{}/.", maps_dir.to_string_lossy());
+    if let Ok(entries) = std::fs::read_dir(&maps_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                let file_name = path.file_name().unwrap_or_default().to_string_lossy();
+                let dest_primary = format!("/sdcard/IterViaeNavus/maps/{}", file_name);
+                let dest_app_specific = format!("/storage/emulated/0/Android/data/com.viae/files/maps/{}", file_name);
 
-    let output = Command::new("adb")
-        .args(["-s", &device_id, "push", &maps_dir_str, "/sdcard/IterViaeNavus/maps/"])
-        .output()
-        .map_err(|e| format!("ADB Sync Failed: {}", e))?;
+                let _ = Command::new("adb")
+                    .args(["-s", &device_id, "push", &path.to_string_lossy(), &dest_primary])
+                    .output();
 
-    let _ = Command::new("adb")
-        .args(["-s", &device_id, "push", &maps_dir_str, "/sdcard/Android/data/com.iterviae.navus/files/maps/"])
-        .output();
+                let _ = Command::new("adb")
+                    .args(["-s", &device_id, "push", &path.to_string_lossy(), &dest_app_specific])
+                    .output();
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("Transfer error: {}", stderr));
+                if let Ok(file_bytes) = std::fs::read(&path) {
+                    let cat_cmd = format!("mkdir -p files/maps && cat > 'files/maps/{}'", file_name);
+                    let child = Command::new("adb")
+                        .args(["-s", &device_id, "shell", "run-as", "com.viae", "sh", "-c", &cat_cmd])
+                        .stdin(std::process::Stdio::piped())
+                        .spawn();
+
+                    if let Ok(mut child_proc) = child {
+                        if let Some(mut stdin) = child_proc.stdin.take() {
+                            use std::io::Write;
+                            let _ = stdin.write_all(&file_bytes);
+                        }
+                        let _ = child_proc.wait();
+                    }
+                }
+            }
+        }
     }
 
     let _ = app.emit(
@@ -349,6 +384,10 @@ pub fn push_trips_to_device(
         .args(["-s", &device_id, "shell", "mkdir", "-p", "/storage/emulated/0/Android/data/com.viae/files/trips/"])
         .output();
 
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "run-as", "com.viae", "mkdir", "-p", "files/trips/"])
+        .output();
+
     let total = file_paths.len();
     let mut pushed_count = 0;
 
@@ -370,6 +409,7 @@ pub fn push_trips_to_device(
             },
         );
 
+        // 1. Push to SD card primary and app-specific external folders
         let output = Command::new("adb")
             .args(["-s", &device_id, "push", file_path, &dest_primary])
             .output();
@@ -378,12 +418,36 @@ pub fn push_trips_to_device(
             .args(["-s", &device_id, "push", file_path, &dest_app_specific])
             .output();
 
+        // 2. Pipe file content directly into app internal sandbox via ADB run-as stdin
+        if let Ok(file_bytes) = std::fs::read(file_path) {
+            let cat_cmd = format!("mkdir -p files/trips && cat > 'files/trips/{}'", file_name);
+            let child = Command::new("adb")
+                .args(["-s", &device_id, "shell", "run-as", "com.viae", "sh", "-c", &cat_cmd])
+                .stdin(std::process::Stdio::piped())
+                .spawn();
+
+            if let Ok(mut child_proc) = child {
+                if let Some(mut stdin) = child_proc.stdin.take() {
+                    use std::io::Write;
+                    let _ = stdin.write_all(&file_bytes);
+                }
+                let _ = child_proc.wait();
+            }
+        }
+
         if let Ok(res) = output {
             if res.status.success() {
                 pushed_count += 1;
             }
         }
     }
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "chmod", "-R", "777", "/sdcard/IterViaeNavus/trips/"])
+        .output();
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "chmod", "-R", "777", "/storage/emulated/0/Android/data/com.viae/files/trips/"])
+        .output();
 
     let _ = app.emit(
         "usb-transfer-progress",
