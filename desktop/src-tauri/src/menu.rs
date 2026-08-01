@@ -38,8 +38,15 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
     let theme_menu = Submenu::with_items(app, "Themes", true, &[&theme_1, &theme_2, &theme_3, &theme_4, &theme_5, &theme_6, &theme_7, &theme_8, &theme_9, &theme_10])?;
     
     let map_menu = Submenu::with_items(app, "Map Tools", true, &[&map_import, &range_finder, &theme_menu])?;
+
+    // Help Menu
+    let user_guide = MenuItem::with_id(app, "help_guide", "User Guide & Wiki", true, Some("F1"))?;
+    let hotkeys = MenuItem::with_id(app, "help_hotkeys", "Keyboard Shortcuts", true, Some("CmdOrCtrl+/"))?;
+    let about = MenuItem::with_id(app, "help_about", "About Iter Viae", true, None::<&str>)?;
+    let help_menu = Submenu::with_items(app, "Help", true, &[&user_guide, &hotkeys, &about])?;
+
     //Assemble the Master Menu
-    let main_menu = Menu::with_items(app, &[&file_menu, &map_menu])?;
+    let main_menu = Menu::with_items(app, &[&file_menu, &map_menu, &help_menu])?;
 
     Ok(main_menu)
 }

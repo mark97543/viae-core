@@ -15,6 +15,7 @@ import PrintModal from './popups/PrintModal';
 import EditPopup from './popups/EditPopup';
 import TitlePopup from './popups/TitlePopup';
 import RangeFinderTool from './popups/RangeFinderTool';
+import HelpWikiModal from './popups/HelpWikiModal';
 
 // Initialize the map worker and custom mbtiles protocol globally
 setupMapLibre();
@@ -32,6 +33,10 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     
     // Print State
     const [printModalOpen, setPrintModalOpen] = useState(false);
+
+    // Help Wiki State
+    const [helpModalOpen, setHelpModalOpen] = useState(false);
+    const [helpModalTab, setHelpModalTab] = useState<'guide' | 'hotkeys' | 'about'>('guide');
 
     const { tripData, setTripData, waypoints } = useWaypoints();
 
@@ -126,12 +131,32 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             setRangeFinderOpen(prev => !prev);
         });
 
+        const unlistenHelp = listen<string>('open-help-wiki', (event) => {
+            const targetTab = (event.payload as 'guide' | 'hotkeys' | 'about') || 'guide';
+            setHelpModalTab(targetTab);
+            setHelpModalOpen(true);
+        });
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'F1') {
+                e.preventDefault();
+                setHelpModalTab('guide');
+                setHelpModalOpen(prev => !prev);
+            }
+            if (e.key === 'Escape') {
+                setHelpModalOpen(false);
+            }
+        };
+
         window.addEventListener('trip-loaded', handleTripLoaded);
+        window.addEventListener('keydown', handleKeyDown);
 
         return () => {
             unlisten.then(f => f());
             unlistenRangeFinder.then(f => f());
+            unlistenHelp.then(f => f());
             window.removeEventListener('trip-loaded', handleTripLoaded);
+            window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 
@@ -173,6 +198,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             />
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
             <PrintModal display={printModalOpen} setDisplay={setPrintModalOpen} />
+            <HelpWikiModal display={helpModalOpen} setDisplay={setHelpModalOpen} initialTab={helpModalTab} />
         </div>
     )
 }

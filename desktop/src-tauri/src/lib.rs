@@ -91,6 +91,15 @@ pub fn run() {
                             let _ = app_handle.opener().open_path(trips_dir.to_string_lossy().to_string(), None::<&str>);
                         }
                     }
+                    "help_guide" => {
+                        let _ = app_handle.emit("open-help-wiki", "guide");
+                    }
+                    "help_hotkeys" => {
+                        let _ = app_handle.emit("open-help-wiki", "hotkeys");
+                    }
+                    "help_about" => {
+                        let _ = app_handle.emit("open-help-wiki", "about");
+                    }
                     _ => {
                         let themes = [
                             "klokantech-basic", "klokantech-3d", "osm-liberty", "maptiler-basic",

@@ -155,12 +155,12 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Render intermediate route waypoints on the map.
   - [X] Allow user to click and drag waypoints to alter the route.
   - [X] Dynamically recalculate and redraw the route on drag release.
-- [ ] **Help Menu**
-  - [ ] Add Hot Keys and Hotkey menus to show the hotkeys
-  - [ ] Add Loading Map help or help wiki 
-  - [ ] Add point and edit details
-  - [ ] Add Routing Intructions and dragging
-  - [ ] Rangefinder help instruction 
+- [X] **Help Menu**
+  - [X] Add Hot Keys and Hotkey menus to show the hotkeys
+  - [X] Add Loading Map help or help wiki 
+  - [X] Add point and edit details
+  - [X] Add Routing Intructions and dragging
+  - [X] Rangefinder help instruction 
 
 - [X] **Trip Stats**
   - [X] Add stats to the trip
@@ -193,3 +193,4 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - **Notes:** Need a secondary upload/processing pipeline for Terrain-RGB `.mbtiles` (separate from the `.pbf` vector data).
   - Add a `terrain` source to MapLibre style JSON to drape roads/themes over true 3D topography.
   - Can use tools like `rio-rgbify` to compile raw DEM GeoTIFFs (from NASA/USGS) into offline `.mbtiles` locally, or allow users to supply pre-packaged regional terrain files.
+  - Notepad Tool
