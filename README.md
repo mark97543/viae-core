@@ -209,6 +209,8 @@ This version builds the mobile client architecture (Android) to act as our off-g
   - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
   - [X] Bypass device idle battery throttling for continuous background GPS tracking.
 
+  
+
 
 
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './MobileSyncModal.css';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { open } from '@tauri-apps/plugin-dialog';
 
 interface MobileSyncModalProps {
     display: boolean;
@@ -81,6 +82,36 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
         }
     };
 
+    const handlePushSpecificMap = async () => {
+        if (!selectedDevice) {
+            alert("Please select a connected USB device first.");
+            return;
+        }
+
+        try {
+            const selected = await open({
+                multiple: false,
+                filters: [{ name: 'Map Files', extensions: ['mbtiles', 'bin', 'db'] }]
+            });
+
+            if (!selected || Array.isArray(selected)) return;
+
+            setIsTransferring(true);
+            setTransferStatus(`Pushing ${selected} to phone...`);
+
+            const result = await invoke<string>('push_map_to_device', {
+                deviceId: selectedDevice,
+                filePath: selected
+            });
+            alert(result);
+        } catch (error) {
+            console.error("Map Push Failed:", error);
+            alert("Map Push Failed: " + error);
+        } finally {
+            setIsTransferring(false);
+        }
+    };
+
     const handleProvisionHeadUnit = async () => {
         if (!selectedDevice) {
             alert("Please select a connected USB device first.");
@@ -91,9 +122,9 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
             "⚠️ DEDICATED HANDLEBAR HEAD UNIT PROVISIONING WARNING:\n\n" +
             "This will provision the target phone into a dedicated off-grid handlebar navigation head unit:\n\n" +
             "• Install / update Iter Viae Navus APK\n" +
-            "• Autostart Navus automatically on device boot\n" +
+            "• Lock Navus as primary System Home Launcher (Kiosk Mode)\n" +
+            "• Deactivate cellular radios (Airplane Mode ON • GPS & Wi-Fi Active)\n" +
             "• Override battery throttling to prevent background GPS kills\n" +
-            "• Configure off-grid radio mode (GPS & Wi-Fi active)\n" +
             "• Create vault path /sdcard/IterViaeNavus/maps/\n\n" +
             "Proceed with provisioning?"
         );
@@ -177,16 +208,24 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                     {/* Active Tab Panel */}
                     {activeTab === 'sync' ? (
                         <div className="mobile-panel">
-                            <div className="mobile-panel-title">Copy Offline Map Vault to Phone</div>
+                            <div className="mobile-panel-title">Copy Offline Maps to Phone over USB</div>
                             <p className="mobile-panel-desc">
-                                Transfers your active desktop vector map (`.mbtiles`), POI search index, and routing graph directly into the phone's internal storage (`/sdcard/IterViaeNavus/maps/`).
+                                Transfers your active desktop vector map archives (`.mbtiles`), POI search index, and routing graph directly into the phone's internal storage (`/sdcard/IterViaeNavus/maps/`).
                             </p>
                             <button 
                                 className="mobile-action-btn primary"
                                 onClick={handleSyncAllMaps}
                                 disabled={isTransferring || !selectedDevice}
+                                style={{ marginBottom: '10px' }}
                             >
                                 {isTransferring ? transferStatus || 'Syncing Map Vault...' : '📁 COPY ENTIRE MAP VAULT TO PHONE (USB)'}
+                            </button>
+                            <button 
+                                className="mobile-action-btn secondary"
+                                onClick={handlePushSpecificMap}
+                                disabled={isTransferring || !selectedDevice}
+                            >
+                                🗺️ SELECT & PUSH SPECIFIC MAP (.mbtiles)
                             </button>
                         </div>
                     ) : (
@@ -197,9 +236,9 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                             </p>
                             <ul className="mobile-feature-list">
                                 <li>⚡ <strong>APK Install & Auto-launch:</strong> Installs Iter Viae Navus and opens it live on screen.</li>
+                                <li>🔒 <strong>System Home Kiosk Launcher:</strong> Locks Navus as default Home app.</li>
+                                <li>📡 <strong>Cellular Radio Shutdown:</strong> Forces Airplane Mode ON with active GPS & Wi-Fi.</li>
                                 <li>🔋 <strong>Battery Throttling Bypass:</strong> Whitelists Navus from Android device idle kills.</li>
-                                <li>📡 <strong>Radio Lockdown:</strong> Locks GPS and Wi-Fi active for off-grid handlebar tracking.</li>
-                                <li>🚀 <strong>Boot Autostart:</strong> Autostarts Navus automatically when phone powers on.</li>
                             </ul>
                             <button 
                                 className="mobile-action-btn warning"
