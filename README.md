@@ -201,7 +201,7 @@ This version builds the mobile client architecture (Android) to act as our off-g
 - [X] **USB Phone Recognition & Storage Vault Detection**
   - [X] Tauri Rust backend auto-recognizes connected Android hardware over USB/ADB.
 - [X] **1-Click Offline Map Vault Sync**
-  - [X] Dedicated desktop `Mobile` menu option to stream full map vault (`.mbtiles`, routing networks, POI index) to `/sdcard/IterViaeNavus/maps/`.
+  - [X] Dedicated desktop `Mobile` menu option to stream full map vault (`.mbtiles`, routing networks, POI index) over USB to `/sdcard/IterViaeNavus/maps/`.
 - [X] **Handlebar Head Unit Provisioning & Kiosk Lockdown**
   - [X] Install standalone offline APK bundle directly to connected hardware.
   - [X] Lock Iter Viae Navus as default System Home Launcher (Kiosk Mode).

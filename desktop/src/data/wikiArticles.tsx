@@ -65,14 +65,10 @@ export const WIKI_CATEGORIES: ArticleCategory[] = [
                     Connect your Android phone to your workstation PC via USB (with File Transfer or ADB enabled). Open <strong>Mobile &gt; USB Sync &amp; Device Vault...</strong> in the top menu. The workstation automatically recognizes connected Android hardware.
                 </p>
 
-                <h3 className="help-wiki-section-h3">2. Pushing Offline Maps to Phone (Single &amp; Vault)</h3>
+                <h3 className="help-wiki-section-h3">2. 1-Click Map Vault Sync</h3>
                 <p className="help-wiki-text">
-                    In the <strong>Mobile &gt; USB Sync</strong> tab, you have two options to load offline maps onto your phone:
+                    In the <strong>Mobile &gt; USB Sync</strong> tab, click <strong>📁 Copy Entire Map Vault to Phone (USB)</strong>. The desktop app streams your complete map folder (<code className="help-wiki-code">.mbtiles</code> vector maps, <code className="help-wiki-code">geocoder.db</code> search index, and routing graphs) directly into <code className="help-wiki-code">/sdcard/IterViaeNavus/maps/</code> over USB.
                 </p>
-                <ul className="help-wiki-list">
-                    <li><strong>📁 Copy Entire Map Vault to Phone (USB):</strong> Automatically streams your complete desktop map folder (<code className="help-wiki-code">.mbtiles</code> vector maps, <code className="help-wiki-code">geocoder.db</code> search index, and routing graphs) directly into <code className="help-wiki-code">/sdcard/IterViaeNavus/maps/</code> over USB.</li>
-                    <li><strong>🗺️ Select &amp; Push Specific Map (.mbtiles):</strong> Opens a native file picker to choose any specific <code className="help-wiki-code">.mbtiles</code> map archive on your computer and pushes it straight to the phone.</li>
-                </ul>
 
                 <h3 className="help-wiki-section-h3">3. Handlebar Head Unit Provisioning</h3>
                 <p className="help-wiki-text">

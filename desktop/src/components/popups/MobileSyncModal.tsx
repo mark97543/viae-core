@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './MobileSyncModal.css';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { open } from '@tauri-apps/plugin-dialog';
 
 interface MobileSyncModalProps {
     display: boolean;
@@ -77,36 +76,6 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
         } catch (error) {
             console.error("Map Vault Sync Failed:", error);
             alert("Vault Sync Failed: " + error);
-        } finally {
-            setIsTransferring(false);
-        }
-    };
-
-    const handlePushSpecificMap = async () => {
-        if (!selectedDevice) {
-            alert("Please select a connected USB device first.");
-            return;
-        }
-
-        try {
-            const selected = await open({
-                multiple: false,
-                filters: [{ name: 'Map Files', extensions: ['mbtiles', 'bin', 'db'] }]
-            });
-
-            if (!selected || Array.isArray(selected)) return;
-
-            setIsTransferring(true);
-            setTransferStatus(`Pushing ${selected} to phone...`);
-
-            const result = await invoke<string>('push_map_to_device', {
-                deviceId: selectedDevice,
-                filePath: selected
-            });
-            alert(result);
-        } catch (error) {
-            console.error("Map Push Failed:", error);
-            alert("Map Push Failed: " + error);
         } finally {
             setIsTransferring(false);
         }
@@ -208,24 +177,16 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                     {/* Active Tab Panel */}
                     {activeTab === 'sync' ? (
                         <div className="mobile-panel">
-                            <div className="mobile-panel-title">Copy Offline Maps to Phone over USB</div>
+                            <div className="mobile-panel-title">Copy Offline Map Vault to Phone over USB</div>
                             <p className="mobile-panel-desc">
-                                Transfers your active desktop vector map archives (`.mbtiles`), POI search index, and routing graph directly into the phone's internal storage (`/sdcard/IterViaeNavus/maps/`).
+                                Copies your entire desktop vector map vault (`.mbtiles`), POI search index, and routing graph directly into the phone's internal storage (`/sdcard/IterViaeNavus/maps/`).
                             </p>
                             <button 
                                 className="mobile-action-btn primary"
                                 onClick={handleSyncAllMaps}
                                 disabled={isTransferring || !selectedDevice}
-                                style={{ marginBottom: '10px' }}
                             >
                                 {isTransferring ? transferStatus || 'Syncing Map Vault...' : '📁 COPY ENTIRE MAP VAULT TO PHONE (USB)'}
-                            </button>
-                            <button 
-                                className="mobile-action-btn secondary"
-                                onClick={handlePushSpecificMap}
-                                disabled={isTransferring || !selectedDevice}
-                            >
-                                🗺️ SELECT & PUSH SPECIFIC MAP (.mbtiles)
                             </button>
                         </div>
                     ) : (
