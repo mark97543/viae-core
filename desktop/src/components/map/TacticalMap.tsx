@@ -1,23 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
-import { Marker, LngLatBounds } from 'maplibre-gl';
-import { listen } from '@tauri-apps/api/event';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import { useRef, useState, useEffect } from 'react';
 import './TacticalMap.css';
-import POIPopup from '../popups/POIPopup.tsx';
-import MarkerPopup from '../popups/MarkerPopup.tsx';
-import SearchBar from './SearchBar.tsx';
-import { THEMES, setupMapLibre } from '../../utils/mapConfig.ts';
-import { parseCoordinates } from '../../utils/mapUtils.ts';
-import { useTacticalMap } from '../../hooks/useTacticalMap.ts';
-import { useWaypoints } from '../../context/WaypointContext.tsx';
-import LeftPanel from '../panel/LeftPanel.tsx';
-import PrintModal from '../popups/PrintModal.tsx';
-import EditPopup from '../popups/EditPopup.tsx';
-import TitlePopup from '../popups/TitlePopup.tsx';
-import RangeFinderTool from '../popups/RangeFinderTool.tsx';
-import HelpWikiModal from '../wiki/HelpWikiModal.tsx';
+import { useTacticalMap } from '../../hooks/useTacticalMap';
+import POIPopup from '../popups/POIPopup';
+import MarkerPopup from '../popups/MarkerPopup';
+import TitlePopup from '../popups/TitlePopup';
+import RangeFinderTool from '../popups/RangeFinderTool';
+import SearchBar from './SearchBar';
+import LeftPanel from '../panel/LeftPanel';
+import PrintModal from '../popups/PrintModal';
+import EditPopup from '../popups/EditPopup';
+import HelpWikiModal from '../wiki/HelpWikiModal';
+import { MobileSyncModal } from '../popups/MobileSyncModal';
+import { useWaypoints } from '../../context/WaypointContext';
+import { LngLatBounds, Marker } from 'maplibre-gl';
+import { listen } from '@tauri-apps/api/event';
 
-setupMapLibre();
+const THEMES = [
+    'osm-bright', 'klokantech-basic', 'klokantech-3d', 'osm-liberty', 
+    'maptiler-basic', 'maptiler-3d', 'toner', 'fiord-color', 'dark-matter', 'positron'
+];
+
+function parseCoordinates(input: string): { lat: number; lng: number } | null {
+    const clean = input.trim();
+    const parts = clean.split(/[\s,]+/);
+    if (parts.length === 2) {
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            return { lat, lng };
+        }
+    }
+    return null;
+}
 
 interface TacticalMapProps {
     activeMapFile?: string;
@@ -34,6 +48,9 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
     const [helpModalOpen, setHelpModalOpen] = useState(false);
     const [helpModalTab, setHelpModalTab] = useState<'guide' | 'hotkeys' | 'about'>('guide');
 
+    const [mobileSyncOpen, setMobileSyncOpen] = useState(false);
+    const [mobileSyncTab, setMobileSyncTab] = useState<'sync' | 'provision'>('sync');
+
     const { tripData, setTripData, waypoints } = useWaypoints();
 
     const {
@@ -42,7 +59,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         poiPopup, setPoiPopup,
         poiData,
         markerPopup, setMarkerPopup,
-        markerData, setMarkerData,
+        markerData,
         editPopup, setEditPopup,
         editData, setEditData,
         clearSearchMarker
@@ -91,26 +108,13 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             if (searchMarker.current) {
                 searchMarker.current.setLngLat([coords.lng, coords.lat]);
             } else {
-                searchMarker.current = new Marker({ color: '#38bdf8' })
+                searchMarker.current = new Marker({ color: '#ff0000' })
                     .setLngLat([coords.lng, coords.lat])
                     .addTo(mapInstance.current);
             }
-
-            setPoiPopup(false);
-            setEditPopup(false);
-            setMarkerData(coords);
-            setMarkerPopup(true);
         }
     };
 
-    // Close Range Finder whenever any other right-side panel opens
-    useEffect(() => {
-        if (poiPopup || markerPopup || editPopup || titlePopup) {
-            setRangeFinderOpen(false);
-        }
-    }, [poiPopup, markerPopup, editPopup, titlePopup]);
-
-    // Close other right-side panels whenever Range Finder opens
     useEffect(() => {
         if (rangeFinderOpen) {
             setPoiPopup(false);
@@ -144,6 +148,12 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             setHelpModalOpen(true);
         });
 
+        const unlistenMobile = listen<string>('open-mobile-sync', (event) => {
+            const tab = (event.payload as 'sync' | 'provision') || 'sync';
+            setMobileSyncTab(tab);
+            setMobileSyncOpen(true);
+        });
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'F1') {
                 e.preventDefault();
@@ -152,6 +162,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             }
             if (e.key === 'Escape') {
                 setHelpModalOpen(false);
+                setMobileSyncOpen(false);
             }
         };
 
@@ -162,6 +173,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             unlisten.then(f => f());
             unlistenRangeFinder.then(f => f());
             unlistenHelp.then(f => f());
+            unlistenMobile.then(f => f());
             window.removeEventListener('trip-loaded', handleTripLoaded);
             window.removeEventListener('keydown', handleKeyDown);
         };
@@ -206,6 +218,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
             <PrintModal display={printModalOpen} setDisplay={setPrintModalOpen} />
             <HelpWikiModal display={helpModalOpen} setDisplay={setHelpModalOpen} initialTab={helpModalTab} />
+            <MobileSyncModal display={mobileSyncOpen} setDisplay={setMobileSyncOpen} initialTab={mobileSyncTab} />
         </div>
     );
 }

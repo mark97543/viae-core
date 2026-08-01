@@ -4,6 +4,7 @@ mod commands;
 mod maptiles;
 mod routing_builder;
 mod routing;
+mod usb_transfer;
 use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 use std::sync::Mutex;
@@ -43,7 +44,11 @@ pub fn run() {
             crate::commands::save_trip_file,
             crate::commands::load_trip_file,
             crate::routing::calculate_route,
-            crate::routing::load_routing_graph
+            crate::routing::load_routing_graph,
+            usb_transfer::detect_usb_devices,
+            usb_transfer::push_map_to_device,
+            usb_transfer::push_all_maps_to_device,
+            usb_transfer::provision_head_unit
             ])
         .setup(|app| {
             //Build and set the native menu useing modular file
@@ -99,6 +104,12 @@ pub fn run() {
                     }
                     "help_about" => {
                         let _ = app_handle.emit("open-help-wiki", "about");
+                    }
+                    "mobile_usb_sync" => {
+                        let _ = app_handle.emit("open-mobile-sync", "sync");
+                    }
+                    "mobile_provision" => {
+                        let _ = app_handle.emit("open-mobile-sync", "provision");
                     }
                     _ => {
                         let themes = [

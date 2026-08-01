@@ -14,17 +14,16 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
     
     let quit_item = MenuItem::with_id(app, "quit", "Exit", true, Some("CmdOrCtrl+Q"))?;
     
-    //Build the subMenus
+    // File Submenu
     let file_menu = Submenu::with_items(app, "File", true, &[
         &new_trip, &load_trip, &save_trip, &save_as_trip, &open_trips, &separator, &quit_item
     ])?;
 
-    //Map Tools Menu
-    let map_import = MenuItem::with_id(app, "mapimport", "Import", true, None::<&str>)?;
+    // Map Tools Menu
+    let map_import = MenuItem::with_id(app, "mapimport", "Import Map Archive (.pbf)...", true, None::<&str>)?;
     let range_finder = MenuItem::with_id(app, "range_finder", "Range Finder", true, None::<&str>)?;
-    
 
-    //Themes
+    // Themes
     let theme_1 = MenuItem::with_id(app, "klokantech-basic", "Klokantech Basic ", true, None::<&str>)?;
     let theme_2 = MenuItem::with_id(app, "klokantech-3d", "Klokantech 3D", true, None::<&str>)?;
     let theme_3 = MenuItem::with_id(app, "osm-liberty", "OSM Liberty", true, None::<&str>)?;
@@ -39,14 +38,19 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
     
     let map_menu = Submenu::with_items(app, "Map Tools", true, &[&map_import, &range_finder, &theme_menu])?;
 
+    // Mobile / Navus Submenu
+    let mobile_sync = MenuItem::with_id(app, "mobile_usb_sync", "USB Sync & Device Vault...", true, Some("CmdOrCtrl+U"))?;
+    let mobile_provision = MenuItem::with_id(app, "mobile_provision", "Provision Handlebar Head Unit...", true, None::<&str>)?;
+    let mobile_menu = Submenu::with_items(app, "Mobile", true, &[&mobile_sync, &mobile_provision])?;
+
     // Help Menu
     let user_guide = MenuItem::with_id(app, "help_guide", "User Guide & Wiki", true, Some("F1"))?;
     let hotkeys = MenuItem::with_id(app, "help_hotkeys", "Keyboard Shortcuts", true, Some("CmdOrCtrl+/"))?;
     let about = MenuItem::with_id(app, "help_about", "About Iter Viae", true, None::<&str>)?;
     let help_menu = Submenu::with_items(app, "Help", true, &[&user_guide, &hotkeys, &about])?;
 
-    //Assemble the Master Menu
-    let main_menu = Menu::with_items(app, &[&file_menu, &map_menu, &help_menu])?;
+    // Master Menu: File, Map Tools, Mobile, Help
+    let main_menu = Menu::with_items(app, &[&file_menu, &map_menu, &mobile_menu, &help_menu])?;
 
     Ok(main_menu)
 }

@@ -22,10 +22,15 @@ function App() {
       if (event.payload === 'map-loader') {
         setCurrentView('maptool')
       }
-    })
+    });
+
+    const handleOpenMapTool = () => setCurrentView('maptool');
+    window.addEventListener('open-maptool', handleOpenMapTool);
+
     return () => {
       clearTimeout(timer);
       unlisten.then(f => f());
+      window.removeEventListener('open-maptool', handleOpenMapTool);
     }
   }, [])
 

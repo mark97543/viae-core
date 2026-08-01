@@ -84,7 +84,7 @@ export default function LeftPanel({
                             </div>
                         )}
                     </div>
-                    
+
                     <button
                         className="trip-settings-btn"
                         onClick={openTripSettings}
@@ -98,51 +98,54 @@ export default function LeftPanel({
                     <span className="left-panel-count">
                         {waypoints.length} {waypoints.length === 1 ? 'Stop' : 'Stops'}
                     </span>
-                    {waypoints.length > 0 && (
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button
-                                onClick={openPrint}
-                                title="Print / Export Roadbook (PDF)"
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: '#38bdf8',
-                                    cursor: 'pointer',
-                                    padding: '4px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                    <rect x="6" y="14" width="12" height="8"></rect>
-                                </svg>
-                            </button>
-                            <button
-                                onClick={zoomToTrip}
-                                title="Zoom to fit entire trip"
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: '#38bdf8',
-                                    cursor: 'pointer',
-                                    padding: '4px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M15 3h6v6"></path>
-                                    <path d="M9 21H3v-6"></path>
-                                    <path d="M21 3l-7 7"></path>
-                                    <path d="M3 21l7-7"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+
+                        {waypoints.length > 0 && (
+                            <>
+                                <button
+                                    onClick={openPrint}
+                                    title="Print / Export Roadbook (PDF)"
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#38bdf8',
+                                        cursor: 'pointer',
+                                        padding: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                        <rect x="6" y="14" width="12" height="8"></rect>
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={zoomToTrip}
+                                    title="Zoom to fit entire trip"
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#38bdf8',
+                                        cursor: 'pointer',
+                                        padding: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M15 3h6v6"></path>
+                                        <path d="M9 21H3v-6"></path>
+                                        <path d="M21 3l-7 7"></path>
+                                        <path d="M3 21l7-7"></path>
+                                    </svg>
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 

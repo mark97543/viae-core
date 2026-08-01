@@ -16,11 +16,12 @@ const MapTool = ({ maptool_display, setView }: MapToolProps) => {
     const [gazetteerProgress, setGazetteerProgress] = useState('');
 
     useEffect(() => {
-        const unlisten = listen<string>('gazetteer-progress', (event) => {
+        const unlistenGazetteer = listen<string>('gazetteer-progress', (event) => {
             setGazetteerProgress(event.payload);
         });
+
         return () => {
-            unlisten.then(f => f());
+            unlistenGazetteer.then(f => f());
         };
     }, []);
 
@@ -31,11 +32,10 @@ const MapTool = ({ maptool_display, setView }: MapToolProps) => {
                 directory: false,
                 filters: [{
                     name: 'Offline Map Archives',
-                    extensions: ['pbf']
+                    extensions: ['pbf', 'osm']
                 }]
             });
             if (selectedPath) {
-                console.log("Selected map File Path: ", selectedPath);
                 setFilePath(selectedPath as string);
                 const size = await invoke<string>('get_file_size', { filePath: selectedPath });
                 setFileSize(size);
@@ -68,13 +68,13 @@ const MapTool = ({ maptool_display, setView }: MapToolProps) => {
         <div className="MapTool_Wrapper" style={{ display: maptool_display ? 'flex' : 'none' }}>
             <div className="MapTool_Card">
                 <div className="MapTool_Header">
-                    <h2>Import Offline Map</h2>
-                    <p>Select a `.pbf` map archive to load into the tactical vault.</p>
+                    <h2>Import & Forge Map Archive</h2>
+                    <p>Select a `.pbf` OpenStreetMap archive to compile vector tiles, routing networks, and POI index into the tactical vault.</p>
                 </div>
 
                 <div className="MapTool_Content">
                     <div className="MapTool_FileDisplay">
-                        <span className="MapTool_Label">Selected Source</span>
+                        <span className="MapTool_Label">Selected Source Archive (.pbf)</span>
                         <div className="MapTool_PathBox" title={filePath}>
                             <div className="MapTool_PathText">
                                 {filePath ? filePath : "No file selected"}
@@ -96,7 +96,7 @@ const MapTool = ({ maptool_display, setView }: MapToolProps) => {
                             </div>
                         ) : (
                             <>
-                                <button className='button' onClick={() => handleConfirmImport()}>Import Map</button>
+                                <button className='button' onClick={() => handleConfirmImport()}>Import & Compile Map</button>
                                 <button className='button' onClick={handleFileImport}>
                                     {filePath ? 'Change File' : 'Browse Files'}
                                 </button>

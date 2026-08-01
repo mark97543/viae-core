@@ -96,6 +96,123 @@
     flex-shrink: 0;
 }
 
+/* USB Section Styling */
+.MapTool_UsbSection {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.MapTool_UsbHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.MapTool_RefreshBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.MapTool_RefreshBtn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.MapTool_DeviceList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.MapTool_DeviceCard {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.MapTool_DeviceCard:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.05);
+}
+
+.MapTool_DeviceCard.active {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.MapTool_DeviceIcon {
+    font-size: 1.2rem;
+}
+
+.MapTool_DeviceInfo {
+    flex: 1;
+}
+
+.MapTool_DeviceName {
+    color: #f8fafc;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.MapTool_DeviceId {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+.MapTool_CheckMark {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.MapTool_NoDevice {
+    color: #64748b;
+    font-size: 0.8rem;
+    font-style: italic;
+    padding: 0.5rem 0;
+}
+
+.MapTool_SyncBtn {
+    background: #22c55e !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    margin-top: 0.25rem;
+    width: 100%;
+}
+
+.MapTool_SyncBtn:hover {
+    background: #16a34a !important;
+}
+
+.MapTool_ProvisionBtn {
+    background: rgba(234, 179, 8, 0.15) !important;
+    border: 1px solid rgba(234, 179, 8, 0.4) !important;
+    color: #eab308 !important;
+    font-weight: bold !important;
+}
+
+.MapTool_ProvisionBtn:hover {
+    background: rgba(234, 179, 8, 0.3) !important;
+    border-color: #eab308 !important;
+}
+
 .MapTool_Actions {
     display: flex;
     justify-content: flex-end;

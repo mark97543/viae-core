@@ -178,7 +178,7 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - Direct desktop export via `@tauri-apps/plugin-fs`, automatically saving to `~/Desktop/Itinerary_[size].pdf` and opening in the OS default PDF viewer.
 
 - [X] **Route Budget**
-- [ ] **Misc**
+- [X] **Misc**
   - [X] When a trip is loaded zoom into it
   - [X] Trip overview to zoom out see whole trip 
   - [X] Modify the waypoint buttons to thin out the div and have a cleaner look.
@@ -187,6 +187,23 @@ This we will be adding points to a left bar to organize poi,s in order then rout
   - [X] Range Finder
   - [X] Different color Lines for different days
   - [X] Route Budget
+
+
+
+## Version 0.5 Navus (Navigation)
+
+This version builds the mobile client architecture (Android) to act as our off-grid handlebar navigation head unit, handshaking locally with the desktop planner via QR code payloads and offline map files.
+
+### Mobile Client & Air-Gapped Pipeline
+- [X] **Android Project Initialization**
+  - [X] Scaffold React Native / Expo workspace structured for Android (API 24+ minimum).
+  - [X] Implement high-contrast dark-mode theme matching the desktop Tailwind aesthetic.
+- [X] Set up recognition as usbdrive our desktop app will reconize
+- [X] Add option to desktop app to load map to phone (USB)
+- [X] Add option to install iterviae into android as a background service that can autostart and run without USB connected or power connected. This will also put phone in laptopmode onlny allowinf gps and wifi 
+
+
+
 
 ## Future / Roadmap
 - [ ] **3D Terrain-RGB Support**
