@@ -71,37 +71,43 @@ export default function RangeFinderTool({ display, setDisplay, mapInstance }: Ra
         
         const greenCircles: any[] = [];
 
-        const fuelStopDistances = fuelWaypoints.map(wp => {
+        const fuelStopsWithDist = fuelWaypoints.map(wp => {
             const pt = turf.point([wp.lng, wp.lat]);
             const snapped = turf.nearestPointOnLine(mainLine, pt);
-            return snapped.properties.location || 0;
+            const distKm = snapped.properties.location || 0;
+            const distMiles = turf.convertLength(distKm, 'kilometers', 'miles');
+            return { wp, distMiles };
         });
 
-        fuelStopDistances.sort((a, b) => a - b);
+        fuelStopsWithDist.sort((a, b) => a.distMiles - b.distMiles);
         
         const rangeMiles = fuelRange;
-        
+        const totalLengthMiles = turf.length(mainLine, { units: 'miles' });
+
         let redSearchAreas: any[] = [];
         let greenSearchAreas: any[] = [];
         
         let currentRefDistance = 0;
 
-        const totalLengthMiles = turf.length(mainLine, { units: 'miles' });
-        const allDistances = [...fuelStopDistances.map(d => turf.convertLength(d, 'kilometers', 'miles')), totalLengthMiles];
+        const allCheckpoints = fuelStopsWithDist.map(s => s.distMiles);
+        if (allCheckpoints.length === 0 || allCheckpoints[allCheckpoints.length - 1] < totalLengthMiles - 0.01) {
+            allCheckpoints.push(totalLengthMiles);
+        }
 
-        allDistances.forEach((dist, index) => {
+        allCheckpoints.forEach((dist, index) => {
             const legDistance = dist - currentRefDistance;
             
-            if (index < fuelStopDistances.length && legDistance <= rangeMiles * 1.1) {
-                const wp = fuelWaypoints[index];
-                greenCircles.push(turf.point([wp.lng, wp.lat]));
+            if (index < fuelStopsWithDist.length && legDistance <= rangeMiles * 1.1) {
+                const stopObj = fuelStopsWithDist[index];
+                greenCircles.push(turf.point([stopObj.wp.lng, stopObj.wp.lat]));
             }
             
             let startSlice = currentRefDistance + (rangeMiles * 0.2);
             let endSlice = dist;
             
             if (legDistance > rangeMiles * 1.1) {
-                endSlice = currentRefDistance + (rangeMiles * 1.1);
+                // Compensate for the 0.1 (10%) circular end-cap buffer so the front tip of the red oval aligns precisely with 1.1 (110%) max fuel range
+                endSlice = currentRefDistance + (rangeMiles * 1.0);
                 if (endSlice > dist) endSlice = dist;
                 if (startSlice > dist) startSlice = dist;
                 

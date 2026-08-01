@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode, useEffect, useRef, useC
 import { listen } from '@tauri-apps/api/event';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
+import * as turf from '@turf/turf';
 import { saveTripToFile, saveTripAsFileDialog, loadTripFromFileDialog } from '../services/tripStorage';
 
 export interface Waypoint {
@@ -32,7 +33,7 @@ export interface RouteData {
 
 interface WaypointContextType {
     waypoints: Waypoint[];
-    addWaypoint: (waypoint: Omit<Waypoint, 'id'>) => void;
+    addWaypoint: (waypoint: Omit<Waypoint, 'id'>, targetIndex?: number) => void;
     editWaypoint: (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => void;
     removeWaypoint: (id: string) => void;
     reorderWaypoints: (startIndex: number, endIndex: number) => void;
@@ -72,12 +73,43 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
     }, [tripData, waypoints, currentFilePath]);
 
 
-    const addWaypoint = useCallback((waypoint: Omit<Waypoint, 'id'>) => {
+    const addWaypoint = useCallback((waypoint: Omit<Waypoint, 'id'>, targetIndex?: number) => {
         const newWaypoint: Waypoint = {
             ...waypoint,
             id: crypto.randomUUID(),
         };
-        setWaypoints((prev) => [...prev, newWaypoint]);
+        setWaypoints((prev) => {
+            if (typeof targetIndex === 'number' && targetIndex >= 0 && targetIndex <= prev.length) {
+                const next = [...prev];
+                next.splice(targetIndex, 0, newWaypoint);
+                return next;
+            }
+
+            if (prev.length < 2) {
+                return [...prev, newWaypoint];
+            }
+
+            // Smart insertion: find which leg segment the new point is closest to
+            const newPt = turf.point([newWaypoint.lng, newWaypoint.lat]);
+            let bestIndex = prev.length - 1;
+            let minDistance = Infinity;
+
+            for (let i = 0; i < prev.length - 1; i++) {
+                const seg = turf.lineString([
+                    [prev[i].lng, prev[i].lat],
+                    [prev[i + 1].lng, prev[i + 1].lat]
+                ]);
+                const dist = turf.pointToLineDistance(newPt, seg, { units: 'miles' });
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestIndex = i + 1;
+                }
+            }
+
+            const next = [...prev];
+            next.splice(bestIndex, 0, newWaypoint);
+            return next;
+        });
     }, []);
 
     const editWaypoint = useCallback((id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => {

@@ -103,6 +103,23 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
         }
     };
 
+    // Close Range Finder whenever any other right-side panel opens
+    useEffect(() => {
+        if (poiPopup || markerPopup || editPopup || titlePopup) {
+            setRangeFinderOpen(false);
+        }
+    }, [poiPopup, markerPopup, editPopup, titlePopup]);
+
+    // Close other right-side panels whenever Range Finder opens
+    useEffect(() => {
+        if (rangeFinderOpen) {
+            setPoiPopup(false);
+            setMarkerPopup(false);
+            setEditPopup(false);
+            setTitlePopup(false);
+        }
+    }, [rangeFinderOpen]);
+
     useEffect(() => {
         const unlisten = listen<string>('change-theme', (event) => {
             setTheme(event.payload);
