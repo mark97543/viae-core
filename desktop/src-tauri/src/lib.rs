@@ -7,7 +7,7 @@ mod routing;
 use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 use std::sync::Mutex;
-use crate::routing::{RoutingGraph, RoutingState};
+use crate::routing::RoutingState;
 
 
 #[tauri::command]

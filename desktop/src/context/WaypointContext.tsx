@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useRef, useCallback } from 'react';
 import { listen } from '@tauri-apps/api/event';
-import { confirm, save, open } from '@tauri-apps/plugin-dialog';
+import { confirm } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
-import { appDataDir, join } from '@tauri-apps/api/path';
+import { saveTripToFile, saveTripAsFileDialog, loadTripFromFileDialog } from '../services/tripStorage';
 
 export interface Waypoint {
     id: string;
@@ -182,26 +182,10 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        // The logic for opening a Save Dialog, saving, and storing the path
         const performSaveAs = async () => {
-            const appDir = await appDataDir();
-            const defaultTripsFolder = await join(appDir, 'trips', 'tactical_plan.json');
-
-            const filePath = await save({
-                defaultPath: defaultTripsFolder,
-                filters: [{ name: 'JSON', extensions: ['json'] }]
-            });
-
-            if (filePath) {
-                const dataToSave = {
-                    tripData: latestData.current.tripData,
-                    waypoints: latestData.current.waypoints
-                };
-                await invoke('save_trip_file', {
-                    path: filePath,
-                    contents: JSON.stringify(dataToSave, null, 2)
-                });
-                setCurrentFilePath(filePath);
+            const savedPath = await saveTripAsFileDialog(latestData.current.tripData, latestData.current.waypoints);
+            if (savedPath) {
+                setCurrentFilePath(savedPath);
             }
         };
 
@@ -219,14 +203,8 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
                 const { currentFilePath: path, tripData: tData, waypoints: wData } = latestData.current;
 
                 if (path) {
-                    // Bypass Dialog!
-                    const dataToSave = { tripData: tData, waypoints: wData };
-                    await invoke('save_trip_file', {
-                        path,
-                        contents: JSON.stringify(dataToSave, null, 2)
-                    });
+                    await saveTripToFile(path, tData, wData);
                 } else {
-                    // Fall back to Save As if no file path exists yet
                     await performSaveAs();
                 }
             } catch (err) {
@@ -249,29 +227,14 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
             if (!isConfirmed) return;
 
             try {
-                const appDir = await appDataDir();
-                const defaultTripsFolder = await join(appDir, 'trips');
-
-                const filePath = await open({
-                    defaultPath: defaultTripsFolder,
-                    filters: [{ name: 'JSON', extensions: ['json'] }]
-                });
-
-                if (filePath && typeof filePath === 'string') {
-                    const fileContents = await invoke<string>('load_trip_file', { path: filePath });
-                    const parsedData = JSON.parse(fileContents);
-
-                    if (parsedData.tripData && Array.isArray(parsedData.waypoints)) {
-                        setTripData(parsedData.tripData);
-                        setWaypoints(parsedData.waypoints);
-                        setCurrentFilePath(filePath);
-                        // Let map know to zoom in
-                        setTimeout(() => {
-                            window.dispatchEvent(new CustomEvent('trip-loaded', { detail: parsedData.waypoints }));
-                        }, 100);
-                    } else {
-                        alert("Error: The selected JSON file is not a valid Trip format.");
-                    }
+                const result = await loadTripFromFileDialog();
+                if (result) {
+                    setTripData(result.data.tripData);
+                    setWaypoints(result.data.waypoints);
+                    setCurrentFilePath(result.filePath);
+                    setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('trip-loaded', { detail: result.data.waypoints }));
+                    }, 100);
                 }
             } catch (err) {
                 console.error("Failed to load trip:", err);

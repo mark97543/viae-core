@@ -1,0 +1,362 @@
+.left-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 320px;
+    background-color: rgba(15, 15, 15, 0.75); /* Deep transparent dark */
+    backdrop-filter: blur(16px); /* Strong glassmorphism effect */
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08); /* Border on the right since it's on the left side */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    color: #f1f5f9;
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.6); /* Shadow pushes right */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.left-panel-header {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+}
+
+.left-panel-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.left-panel-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.trip-datetime-badge {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #38bdf8;
+}
+
+.trip-settings-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.trip-settings-btn:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.left-panel-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.left-panel-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trip-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin-top: 8px;
+}
+
+.trip-stats-divider {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.left-panel-empty {
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    padding: 40px 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+.left-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar */
+.left-panel-content::-webkit-scrollbar {
+    width: 4px;
+}
+.left-panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.left-panel-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.waypoint-card {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    position: relative;
+    transition: all 0.2s ease;
+    border-left: 3px solid #38bdf8;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    cursor: pointer;
+}
+
+.waypoint-card-top-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    padding: 0 0 0 14px;
+    width: 100%;
+}
+
+.waypoint-card:hover {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(56, 189, 248, 0.5);
+    transform: translateX(4px);
+}
+
+.waypoint-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+    border-style: dashed;
+}
+
+.waypoint-drag-handle {
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.waypoint-drag-handle:active {
+    cursor: grabbing;
+}
+
+.waypoint-drag-handle:hover {
+    background: rgba(56, 189, 248, 0.25);
+}
+
+.waypoint-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 0;
+}
+
+.waypoint-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.waypoint-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.waypoint-card-edit-btn {
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    padding: 0;
+    width: 40px;
+    border-radius: 0; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.waypoint-card-edit-btn:hover {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+}
+
+.waypoint-card-coords-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+}
+
+.waypoint-card-coords {
+    font-family: monospace;
+    font-size: 11px;
+    color: #cbd5e1;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.waypoint-card-coords:hover {
+    color: #38bdf8;
+}
+
+.waypoint-card-times-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 4px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.waypoint-time.arrival {
+    color: #34d399;
+}
+
+.waypoint-time.departure {
+    color: #f87171;
+}
+
+.waypoint-time-divider {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.waypoint-leg-connector {
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 16px;
+    margin: 4px 0;
+    position: relative;
+    height: 32px;
+}
+
+.leg-line {
+    position: absolute;
+    left: 27px;
+    top: -12px;
+    bottom: -12px;
+    width: 2px;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(56, 189, 248, 0.4),
+        rgba(56, 189, 248, 0.4) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    z-index: 0;
+}
+
+.leg-stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-left: 30px;
+    z-index: 1;
+}
+
+.leg-stats-divider {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.leg-stats svg {
+    color: #38bdf8;
+}
+
+.left-panel-footer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+}
+
+.day-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0 8px 0;
+    position: relative;
+}
+
+.day-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+}
+
+.day-divider span {
+    background: #0f172a;
+    padding: 0 12px;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 1;
+}

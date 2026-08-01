@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import Splash from "./assets/Splash/Splash";
-import MapTool from "./assets/MapTool/MapTool";
+import Splash from "./components/splash/Splash.tsx";
+import MapTool from "./components/maptool/MapTool.tsx";
+import MapContainer from "./components/map/MapContainer.tsx";
 import { listen } from "@tauri-apps/api/event";
-import Map from "./assets/Map/Map";
 
 type ViewState = 'splash' | 'map' | 'maptool'
 
@@ -31,10 +31,9 @@ function App() {
 
   return (
     <div>
-
       <Splash splash={currentView === 'splash'} />
       <MapTool maptool_display={currentView === 'maptool'} setView={setCurrentView} />
-      <Map map_display={currentView === 'map'} />
+      <MapContainer map_display={currentView === 'map'} />
     </div>
   );
 }

@@ -1,0 +1,42 @@
+.range-finder-popup {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 360px;
+    background-color: rgba(15, 15, 15, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    color: #f1f5f9;
+    box-shadow: -15px 0 40px rgba(0, 0, 0, 0.6);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.range-finder-popup.open {
+    transform: translateX(0);
+}
+
+.range-finder-popup h2 {
+    margin: 0 0 24px 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+    line-height: 1.3;
+}
+
+.range-finder-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
