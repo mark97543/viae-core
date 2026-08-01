@@ -70,9 +70,7 @@ pub fn list_saved_trips(app_handle: AppHandle) -> Result<Vec<TripFileInfo>, Stri
     let mut candidate_dirs = Vec::new();
 
     if let Ok(app_dir) = app_handle.path().app_data_dir() {
-        let trips_dir = app_dir.join("trips");
-        let _ = std::fs::create_dir_all(&trips_dir);
-        candidate_dirs.push(trips_dir);
+        candidate_dirs.push(app_dir.join("trips"));
         candidate_dirs.push(app_dir);
     }
 
@@ -84,39 +82,39 @@ pub fn list_saved_trips(app_handle: AppHandle) -> Result<Vec<TripFileInfo>, Stri
     candidate_dirs.push(std::path::PathBuf::from("/storage/emulated/0/Android/data/com.viae/files"));
     candidate_dirs.push(std::path::PathBuf::from("/data/data/com.viae/files/trips"));
     candidate_dirs.push(std::path::PathBuf::from("/data/data/com.viae/files"));
+    candidate_dirs.push(std::path::PathBuf::from("/data/user/0/com.viae/files/trips"));
+    candidate_dirs.push(std::path::PathBuf::from("/data/user/0/com.viae/files"));
 
     let mut trip_files = Vec::new();
 
     for dir in candidate_dirs {
-        if dir.exists() {
-            if let Ok(entries) = std::fs::read_dir(&dir) {
-                for entry in entries.flatten() {
-                    let path = entry.path();
-                    let ext = path.extension().map(|s| s.to_string_lossy().to_lowercase());
-                    if ext.as_deref() == Some("json") {
-                        let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
-                        let mut name = filename.clone();
-                        let mut waypoint_count = 0;
+        if let Ok(entries) = std::fs::read_dir(&dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let ext = path.extension().map(|s| s.to_string_lossy().to_lowercase());
+                if ext.as_deref() == Some("json") {
+                    let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                    let mut name = filename.clone();
+                    let mut waypoint_count = 0;
 
-                        if let Ok(content) = std::fs::read_to_string(&path) {
-                            if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
-                                if let Some(n) = val.get("tripData").and_then(|td| td.get("name")).and_then(|n| n.as_str()) {
-                                    name = n.to_string();
-                                }
-                                if let Some(wps) = val.get("waypoints").and_then(|w| w.as_array()) {
-                                    waypoint_count = wps.len();
-                                }
+                    if let Ok(content) = std::fs::read_to_string(&path) {
+                        if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+                            if let Some(n) = val.get("tripData").and_then(|td| td.get("name")).and_then(|n| n.as_str()) {
+                                name = n.to_string();
+                            }
+                            if let Some(wps) = val.get("waypoints").and_then(|w| w.as_array()) {
+                                waypoint_count = wps.len();
                             }
                         }
+                    }
 
-                        if !trip_files.iter().any(|t: &TripFileInfo| t.filename == filename) {
-                            trip_files.push(TripFileInfo {
-                                name,
-                                filename,
-                                path: path.to_string_lossy().to_string(),
-                                waypoint_count,
-                            });
-                        }
+                    if !trip_files.iter().any(|t: &TripFileInfo| t.filename == filename) {
+                        trip_files.push(TripFileInfo {
+                            name,
+                            filename,
+                            path: path.to_string_lossy().to_string(),
+                            waypoint_count,
+                        });
                     }
                 }
             }

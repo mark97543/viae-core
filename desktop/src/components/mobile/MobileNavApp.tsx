@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './MobileNavApp.css';
 import TacticalMap from '../map/TacticalMap';
 import { invoke } from '@tauri-apps/api/core';
+import { useWaypoints } from '../../context/WaypointContext';
 
 type ScreenView = 'dashboard' | 'navigation' | 'qrscanner';
 
@@ -32,6 +33,8 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
   const [activeTripName, setActiveTripName] = useState<string>('No Active Trip');
   const [activeWaypointCount, setActiveWaypointCount] = useState<number>(0);
 
+  const { setWaypoints, setTripData } = useWaypoints();
+
   const fetchTrips = async () => {
     try {
       const trips = await invoke<SavedTrip[]>('list_saved_trips');
@@ -58,8 +61,13 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
       setActiveTripName(tripData.name || trip.name);
       setActiveWaypointCount(waypoints.length);
 
+      setTripData(tripData);
+      setWaypoints(waypoints);
+
       // Dispatch custom trip-loaded event so TacticalMap zooms to trip
-      window.dispatchEvent(new CustomEvent('trip-loaded', { detail: waypoints }));
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('trip-loaded', { detail: waypoints }));
+      }, 100);
       
       // Launch map view immediately
       setCurrentScreen('navigation');
@@ -126,7 +134,12 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
                 ) : (
                   <div className="mobile-trip-list">
                     {savedTrips.map((t) => (
-                      <div key={t.path} className="mobile-trip-item">
+                      <div
+                        key={t.path}
+                        className="mobile-trip-item"
+                        onClick={() => handleLoadTrip(t)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <div className="mobile-trip-info">
                           <div className="mobile-trip-name">📍 {t.name}</div>
                           <div className="mobile-trip-meta">
@@ -135,7 +148,10 @@ export const MobileNavApp: React.FC<MobileNavAppProps> = ({
                         </div>
                         <button
                           className="mobile-load-trip-btn"
-                          onClick={() => handleLoadTrip(t)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLoadTrip(t);
+                          }}
                         >
                           LOAD & LAUNCH
                         </button>

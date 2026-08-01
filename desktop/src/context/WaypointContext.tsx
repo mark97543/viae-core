@@ -33,6 +33,7 @@ export interface RouteData {
 
 interface WaypointContextType {
     waypoints: Waypoint[];
+    setWaypoints: (waypoints: Waypoint[]) => void;
     addWaypoint: (waypoint: Omit<Waypoint, 'id'>, targetIndex?: number) => void;
     editWaypoint: (id: string, updatedData: Partial<Omit<Waypoint, 'id'>>) => void;
     removeWaypoint: (id: string) => void;
@@ -285,7 +286,7 @@ export const WaypointProvider = ({ children }: { children: ReactNode }) => {
 
     return (
         <WaypointContext.Provider value={{
-            waypoints, addWaypoint,
+            waypoints, setWaypoints, addWaypoint,
             editWaypoint, removeWaypoint, reorderWaypoints, clearWaypoints,
             tripData, setTripData, currentFilePath, setCurrentFilePath,
             routeData
