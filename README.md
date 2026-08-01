@@ -209,13 +209,11 @@ This version builds the mobile client architecture (Android) to act as our off-g
   - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
   - [X] Lock into Landscape Mode (`android:screenOrientation="sensorLandscape"`).
   - [X] Change Mobile GUI to accommodate landscape (2-column head unit dashboard layout).
-  - [X] In the Mobile top menu add "Push Trips to Phone" option to push all trips or selected trip itineraries over USB (`Ctrl+T`).
-  
-
-** Note: ** when loading map to phone the phone is giving a ,apvault storage "Permission/Storage Error" 
-- get mobile routing in 
-- Meed ultradark mode on cell phone
-- Wiki on instalation need to include developer options enabling. 
+  - [X] Trip Loader from desktop to the phone and 1-click Saved Trip Selector card.
+  - [ ] In the mobile menu add a "Push Trips" to push all trips or a selection of trips to the phine 
+  - [ ] get mobile routing in 
+  - [ ] Meed ultradark mode on cell phone
+  - [ ] Wiki on instalation need to include developer options enabling. 
 
 
 

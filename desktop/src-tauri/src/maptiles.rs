@@ -20,6 +20,7 @@ fn find_active_mbtiles_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     candidate_dirs.push(PathBuf::from("/storage/emulated/0/IterViaeNavus"));
     candidate_dirs.push(PathBuf::from("/storage/emulated/0/Android/data/com.viae/files/maps"));
     candidate_dirs.push(PathBuf::from("/storage/emulated/0/Android/data/com.viae/files"));
+    candidate_dirs.push(PathBuf::from("/data/data/com.viae/files/maps"));
     candidate_dirs.push(PathBuf::from("/data/data/com.viae/files"));
 
     for dir in candidate_dirs {
@@ -27,7 +28,8 @@ fn find_active_mbtiles_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
             if let Ok(entries) = fs::read_dir(&dir) {
                 for entry in entries.flatten() {
                     let path = entry.path();
-                    if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("mbtiles") {
+                    let ext = path.extension().map(|s| s.to_string_lossy().to_lowercase());
+                    if ext.as_deref() == Some("mbtiles") {
                         return Ok(path);
                     }
                 }

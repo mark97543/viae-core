@@ -42,8 +42,17 @@ export function setupMapLibre() {
 
             let tileData = new Uint8Array(data);
             if (tileData.length >= 2 && tileData[0] === 0x1F && tileData[1] === 0x8B) {
-                const stream = new Response(tileData).body?.pipeThrough(new DecompressionStream("gzip"));
-                tileData = new Uint8Array(await new Response(stream).arrayBuffer());
+                try {
+                    if (typeof DecompressionStream !== 'undefined') {
+                        const stream = new Response(tileData).body?.pipeThrough(new DecompressionStream("gzip"));
+                        if (stream) {
+                            const decompressedBuffer = await new Response(stream).arrayBuffer();
+                            tileData = new Uint8Array(decompressedBuffer);
+                        }
+                    }
+                } catch (decompErr) {
+                    console.warn("Decompression failed, using raw tile buffer:", decompErr);
+                }
             }
 
             return { data: tileData.buffer };
