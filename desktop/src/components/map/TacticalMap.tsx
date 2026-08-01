@@ -14,11 +14,14 @@ import { MobileSyncModal } from '../popups/MobileSyncModal';
 import { useWaypoints } from '../../context/WaypointContext';
 import { LngLatBounds, Marker } from 'maplibre-gl';
 import { listen } from '@tauri-apps/api/event';
+import { setupMapLibre } from '../../utils/mapConfig';
 
 const THEMES = [
     'osm-bright', 'klokantech-basic', 'klokantech-3d', 'osm-liberty', 
     'maptiler-basic', 'maptiler-3d', 'toner', 'fiord-color', 'dark-matter', 'positron'
 ];
+
+setupMapLibre();
 
 function parseCoordinates(input: string): { lat: number; lng: number } | null {
     const clean = input.trim();

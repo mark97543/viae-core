@@ -183,7 +183,7 @@ pub fn provision_head_unit(
             "usb-transfer-progress",
             UsbTransferProgress {
                 progress_percent: 10.0,
-                status_message: format!("Installing Iter Viae Navus APK on {}...", device_id),
+                status_message: format!("Installing Iter Viae Navus Kiosk APK on {}...", device_id),
             },
         );
 
@@ -203,7 +203,7 @@ pub fn provision_head_unit(
         "usb-transfer-progress",
         UsbTransferProgress {
             progress_percent: 25.0,
-            status_message: format!("1/4: Creating vault /sdcard/IterViaeNavus/maps/ on {}...", device_id),
+            status_message: format!("1/5: Creating vault /sdcard/IterViaeNavus/maps/ on {}...", device_id),
         },
     );
 
@@ -214,8 +214,21 @@ pub fn provision_head_unit(
     let _ = app.emit(
         "usb-transfer-progress",
         UsbTransferProgress {
-            progress_percent: 50.0,
-            status_message: "2/4: Overriding battery throttling & idle mode...".into(),
+            progress_percent: 45.0,
+            status_message: "2/5: Locking Iter Viae Navus as Primary System Home Launcher...".into(),
+        },
+    );
+
+    // Lock device Home Launcher to Iter Viae Navus (Kiosk Mode)
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "cmd", "package", "set-home-activity", "com.iterviae.navus/com.iterviae.navus.MainActivity"])
+        .output();
+
+    let _ = app.emit(
+        "usb-transfer-progress",
+        UsbTransferProgress {
+            progress_percent: 65.0,
+            status_message: "3/5: Overriding battery throttling & idle mode...".into(),
         },
     );
 
@@ -226,8 +239,8 @@ pub fn provision_head_unit(
     let _ = app.emit(
         "usb-transfer-progress",
         UsbTransferProgress {
-            progress_percent: 75.0,
-            status_message: "3/4: Granting background service, GPS & boot autostart permissions...".into(),
+            progress_percent: 80.0,
+            status_message: "4/5: Granting background service & location permissions...".into(),
         },
     );
 
@@ -247,10 +260,27 @@ pub fn provision_head_unit(
     let _ = app.emit(
         "usb-transfer-progress",
         UsbTransferProgress {
-            progress_percent: 90.0,
-            status_message: "4/4: Configuring off-grid radio mode & launching app...".into(),
+            progress_percent: 95.0,
+            status_message: "5/5: Deactivating cellular radios (Airplane Mode ON • GPS & Wi-Fi Active)...".into(),
         },
     );
+
+    // Cellular Shutdown & Off-Grid Radio Lockdown
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "cmd", "connectivity", "airplane-mode", "enable"])
+        .output();
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "svc", "data", "disable"])
+        .output();
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "settings", "put", "global", "mobile_data", "0"])
+        .output();
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "svc", "wifi", "enable"])
+        .output();
 
     let _ = Command::new("adb")
         .args(["-s", &device_id, "shell", "settings", "put", "secure", "location_mode", "3"])
@@ -258,16 +288,16 @@ pub fn provision_head_unit(
 
     // Launch app on device screen
     let _ = Command::new("adb")
-        .args(["-s", &device_id, "shell", "monkey", "-p", "com.iterviae.navus", "-c", "android.intent.category.LAUNCHER", "1"])
+        .args(["-s", &device_id, "shell", "am", "start", "-n", "com.iterviae.navus/.MainActivity"])
         .output();
 
     let _ = app.emit(
         "usb-transfer-progress",
         UsbTransferProgress {
             progress_percent: 100.0,
-            status_message: "Provisioning Complete! Device ready for off-grid handlebar operation.".into(),
+            status_message: "Provisioning Complete! Phone locked to Navus Kiosk & Cellular Deactivated.".into(),
         },
     );
 
-    Ok(format!("Device {} successfully provisioned as Handlebar Head Unit!", device_id))
+    Ok(format!("Device {} successfully provisioned into dedicated Navus Handlebar Kiosk!", device_id))
 }
