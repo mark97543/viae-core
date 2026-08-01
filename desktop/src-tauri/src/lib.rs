@@ -44,6 +44,7 @@ pub fn run() {
             crate::commands::search_pois_by_category,
             crate::commands::save_trip_file,
             crate::commands::load_trip_file,
+            crate::commands::list_saved_trips,
             crate::routing::calculate_route,
             crate::routing::load_routing_graph,
             usb_transfer::detect_usb_devices,

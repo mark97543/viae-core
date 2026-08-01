@@ -192,28 +192,30 @@ This we will be adding points to a left bar to organize poi,s in order then rout
 
 ## Version 0.5 Navus (Navigation)
 
-This version builds the mobile client architecture (Android) to act as our off-grid handlebar navigation head unit, sharing the exact same Rust backend and vector tile rendering engine with the desktop planner.
+This version builds the mobile client architecture (Android) to act as our off-grid handlebar navigation head unit, handshaking locally with the desktop planner via QR code payloads and offline map files.
 
 ### Mobile Client & Air-Gapped Pipeline
-- [X] **Unified Tauri v2 Mobile Architecture (Rust + React)**
-  - [X] Migrated Android mobile target to Tauri v2, sharing core native Rust modules (`maptiles.rs`, SQLite vector tile engine, waypoints, search) between Desktop and Mobile.
-  - [X] Compiled native Rust JNI library (`libdesktop_app_lib.so`) using Android NDK toolchain (`x86_64` / `aarch64`).
-  - [X] High-contrast tactical dark-mode theme matching the desktop aesthetic.
-- [X] **Storage Vault & Multi-Directory Map Detection**
-  - [X] Rust backend auto-detects and scans map archives (`.mbtiles`) across internal app storage and MicroSD card paths (`/sdcard/IterViaeNavus/maps/`, `/storage/emulated/0/IterViaeNavus/maps/`, `app_data_dir/maps/`).
-  - [X] Configured Android Manifest with storage permissions (`READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `MANAGE_EXTERNAL_STORAGE`).
-- [X] **100% Air-Gapped Mobile Vector Map Engine**
-  - [X] 100% offline MapLibre GL rendering via native `mbtiles://` vector tile decoding and in-memory gzip decompression.
-  - [X] Fixed tile coordinate URL parameter parsing for zero-latency local SQLite tile fetching.
-  - [X] Automatic map centering and bounds-fitting based on active `.mbtiles` archive metadata.
-  - [X] Stripped online sprite/glyph dependencies for instant air-gapped map rendering without cloud timeouts.
-- [X] **Clean Read-Only Navigation Viewport & HUD**
-  - [X] Implemented `readOnly` mode for `TacticalMap` on mobile, hiding desktop panels, search bars, theme selectors, and edit popups.
-  - [X] Top telemetry HUD overlay displaying back-to-dashboard navigation, active map name, live speed (MPH), and compass bearing.
-- [X] **Handlebar Head Unit Dashboard & Provisioning**
-  - [X] NAVUS Handlebar Head Unit Dashboard featuring Quick Action cards (`SCAN QR ROUTE`, `LAUNCH MAP`), Head Unit Configuration, Active Trip Telemetry, and Map Vault Manager.
-  - [X] Platform routing in `App.tsx` automatically directing mobile viewports to `MobileNavApp`.
-  - [X] 1-Click Offline Map Vault Sync over USB/ADB.
+- [X] **Android Project Initialization**
+  - [X] Scaffold React Native / Expo workspace structured for Android (API 24+ minimum).
+  - [X] Implement high-contrast dark-mode theme matching the desktop Tailwind aesthetic.
+- [X] **USB Phone Recognition & Storage Vault Detection**
+  - [X] Tauri Rust backend auto-recognizes connected Android hardware over USB/ADB.
+- [X] **1-Click Offline Map Vault Sync**
+  - [X] Dedicated desktop `Mobile` menu option to stream full map vault (`.mbtiles`, routing networks, POI index) over USB to `/sdcard/IterViaeNavus/maps/`.
+- [X] **Handlebar Head Unit Provisioning & Kiosk Lockdown**
+  - [X] Install standalone offline APK bundle directly to connected hardware.
+  - [X] Lock Iter Viae Navus as default System Home Launcher (Kiosk Mode).
+  - [X] Deactivate cellular radios (Airplane Mode ON, Mobile Data OFF, hardware GPS & Wi-Fi active).
+  - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
+  - [X] Lock into Landscape Mode (`android:screenOrientation="sensorLandscape"`).
+  - [X] Change Mobile GUI to accommodate landscape (2-column head unit dashboard layout).
+  - [X] Trip Loader from desktop to the phone and 1-click Saved Trip Selector card.
+  
+
+** Note: ** when loading map to phone the phone is giving a ,apvault storage "Permission/Storage Error" 
+- get mobile routing in 
+- Meed ultradark mode on cell phone
+- Wiki on instalation need to include developer options enabling. 
 
 
 
