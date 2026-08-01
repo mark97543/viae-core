@@ -53,7 +53,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles", readOnl
     const [helpModalTab, setHelpModalTab] = useState<'guide' | 'hotkeys' | 'about'>('guide');
 
     const [mobileSyncOpen, setMobileSyncOpen] = useState(false);
-    const [mobileSyncTab, setMobileSyncTab] = useState<'sync' | 'provision'>('sync');
+    const [mobileSyncTab, setMobileSyncTab] = useState<'sync' | 'push_trips' | 'provision'>('sync');
 
     const { tripData, setTripData, waypoints } = useWaypoints();
 
@@ -153,7 +153,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles", readOnl
         });
 
         const unlistenMobile = listen<string>('open-mobile-sync', (event) => {
-            const tab = (event.payload as 'sync' | 'provision') || 'sync';
+            const tab = (event.payload as 'sync' | 'push_trips' | 'provision') || 'sync';
             setMobileSyncTab(tab);
             setMobileSyncOpen(true);
         });

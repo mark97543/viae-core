@@ -50,6 +50,7 @@ pub fn run() {
             usb_transfer::detect_usb_devices,
             usb_transfer::push_map_to_device,
             usb_transfer::push_all_maps_to_device,
+            usb_transfer::push_trips_to_device,
             usb_transfer::provision_head_unit
             ])
         .setup(|_app| {
@@ -104,6 +105,9 @@ pub fn run() {
                         }
                         "mobile_usb_sync" => {
                             let _ = app_handle.emit("open-mobile-sync", "sync");
+                        }
+                        "mobile_push_trips" => {
+                            let _ = app_handle.emit("open-mobile-sync", "push_trips");
                         }
                         "mobile_provision" => {
                             let _ = app_handle.emit("open-mobile-sync", "provision");

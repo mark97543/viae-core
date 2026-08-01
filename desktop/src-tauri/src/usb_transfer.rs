@@ -330,3 +330,68 @@ pub fn provision_head_unit(
 
     Ok(format!("Device {} successfully provisioned into dedicated Navus Handlebar Kiosk!", device_id))
 }
+
+#[tauri::command]
+pub fn push_trips_to_device(
+    app: tauri::AppHandle,
+    device_id: String,
+    file_paths: Vec<String>,
+) -> Result<String, String> {
+    if file_paths.is_empty() {
+        return Err("No trip files selected to push.".into());
+    }
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/sdcard/IterViaeNavus/trips/"])
+        .output();
+
+    let _ = Command::new("adb")
+        .args(["-s", &device_id, "shell", "mkdir", "-p", "/storage/emulated/0/Android/data/com.viae/files/trips/"])
+        .output();
+
+    let total = file_paths.len();
+    let mut pushed_count = 0;
+
+    for (idx, file_path) in file_paths.iter().enumerate() {
+        let file_name = std::path::Path::new(file_path)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("trip.json");
+
+        let dest_primary = format!("/sdcard/IterViaeNavus/trips/{}", file_name);
+        let dest_app_specific = format!("/storage/emulated/0/Android/data/com.viae/files/trips/{}", file_name);
+
+        let progress = ((idx + 1) as f32 / total as f32) * 100.0;
+        let _ = app.emit(
+            "usb-transfer-progress",
+            UsbTransferProgress {
+                progress_percent: progress,
+                status_message: format!("Pushing trip {} of {}: {}...", idx + 1, total, file_name),
+            },
+        );
+
+        let output = Command::new("adb")
+            .args(["-s", &device_id, "push", file_path, &dest_primary])
+            .output();
+
+        let _ = Command::new("adb")
+            .args(["-s", &device_id, "push", file_path, &dest_app_specific])
+            .output();
+
+        if let Ok(res) = output {
+            if res.status.success() {
+                pushed_count += 1;
+            }
+        }
+    }
+
+    let _ = app.emit(
+        "usb-transfer-progress",
+        UsbTransferProgress {
+            progress_percent: 100.0,
+            status_message: format!("Pushed {} trip itinerary files successfully!", pushed_count),
+        },
+    );
+
+    Ok(format!("Successfully pushed {} of {} trip files to device {}", pushed_count, total, device_id))
+}

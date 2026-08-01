@@ -209,7 +209,7 @@ This version builds the mobile client architecture (Android) to act as our off-g
   - [X] Immersive Sticky Fullscreen (hides status bar and bottom navigation bar for 100% display area).
   - [X] Lock into Landscape Mode (`android:screenOrientation="sensorLandscape"`).
   - [X] Change Mobile GUI to accommodate landscape (2-column head unit dashboard layout).
-  - [X] Trip Loader from desktop to the phone and 1-click Saved Trip Selector card.
+  - [X] In the Mobile top menu add "Push Trips to Phone" option to push all trips or selected trip itineraries over USB (`Ctrl+T`).
   
 
 ** Note: ** when loading map to phone the phone is giving a ,apvault storage "Permission/Storage Error" 

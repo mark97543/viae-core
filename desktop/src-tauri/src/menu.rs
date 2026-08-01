@@ -40,8 +40,9 @@ pub fn create_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<
 
     // Mobile / Navus Submenu
     let mobile_sync = MenuItem::with_id(app, "mobile_usb_sync", "USB Sync & Device Vault...", true, Some("CmdOrCtrl+U"))?;
+    let mobile_push_trips = MenuItem::with_id(app, "mobile_push_trips", "Push Trips to Phone...", true, Some("CmdOrCtrl+T"))?;
     let mobile_provision = MenuItem::with_id(app, "mobile_provision", "Provision Handlebar Head Unit...", true, None::<&str>)?;
-    let mobile_menu = Submenu::with_items(app, "Mobile", true, &[&mobile_sync, &mobile_provision])?;
+    let mobile_menu = Submenu::with_items(app, "Mobile", true, &[&mobile_sync, &mobile_push_trips, &mobile_provision])?;
 
     // Help Menu
     let user_guide = MenuItem::with_id(app, "help_guide", "User Guide & Wiki", true, Some("F1"))?;

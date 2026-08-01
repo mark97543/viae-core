@@ -6,7 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 interface MobileSyncModalProps {
     display: boolean;
     setDisplay: (val: boolean) => void;
-    initialTab?: 'sync' | 'provision';
+    initialTab?: 'sync' | 'push_trips' | 'provision';
 }
 
 interface UsbDevice {
@@ -20,16 +20,26 @@ interface UsbProgress {
     status_message: string;
 }
 
+interface SavedTrip {
+    name: string;
+    filename: string;
+    path: string;
+    waypoint_count: number;
+}
+
 export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
     display,
     setDisplay,
     initialTab = 'sync'
 }) => {
-    const [activeTab, setActiveTab] = useState<'sync' | 'provision'>(initialTab);
+    const [activeTab, setActiveTab] = useState<'sync' | 'push_trips' | 'provision'>(initialTab);
     const [usbDevices, setUsbDevices] = useState<UsbDevice[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<string>('');
     const [isTransferring, setIsTransferring] = useState(false);
     const [transferStatus, setTransferStatus] = useState('');
+
+    const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
+    const [selectedTripPaths, setSelectedTripPaths] = useState<string[]>([]);
 
     const scanUsbDevices = async () => {
         try {
@@ -43,9 +53,22 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
         }
     };
 
+    const fetchDesktopTrips = async () => {
+        try {
+            const trips = await invoke<SavedTrip[]>('list_saved_trips');
+            if (trips && Array.isArray(trips)) {
+                setSavedTrips(trips);
+                setSelectedTripPaths(trips.map(t => t.path));
+            }
+        } catch (err) {
+            console.warn("Failed to list saved trips:", err);
+        }
+    };
+
     useEffect(() => {
         if (display) {
             scanUsbDevices();
+            fetchDesktopTrips();
             setActiveTab(initialTab);
         }
     }, [display, initialTab]);
@@ -59,6 +82,20 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
             unlistenUsb.then(f => f());
         };
     }, []);
+
+    const toggleTripSelection = (path: string) => {
+        setSelectedTripPaths(prev => 
+            prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]
+        );
+    };
+
+    const toggleSelectAllTrips = () => {
+        if (selectedTripPaths.length === savedTrips.length) {
+            setSelectedTripPaths([]);
+        } else {
+            setSelectedTripPaths(savedTrips.map(t => t.path));
+        }
+    };
 
     const handleSyncAllMaps = async () => {
         if (!selectedDevice) {
@@ -76,6 +113,33 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
         } catch (error) {
             console.error("Map Vault Sync Failed:", error);
             alert("Vault Sync Failed: " + error);
+        } finally {
+            setIsTransferring(false);
+        }
+    };
+
+    const handlePushTripsToPhone = async () => {
+        if (!selectedDevice) {
+            alert("Please select a connected USB device first.");
+            return;
+        }
+
+        if (selectedTripPaths.length === 0) {
+            alert("Please select at least one trip to push.");
+            return;
+        }
+
+        setIsTransferring(true);
+        setTransferStatus('Pushing selected trips to phone over USB...');
+        try {
+            const result = await invoke<string>('push_trips_to_device', {
+                deviceId: selectedDevice,
+                filePaths: selectedTripPaths
+            });
+            alert(result);
+        } catch (error) {
+            console.error("Trip Push Failed:", error);
+            alert("Trip Push Failed: " + error);
         } finally {
             setIsTransferring(false);
         }
@@ -136,6 +200,12 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                         📁 MAP VAULT USB SYNC
                     </button>
                     <button 
+                        className={`mobile-tab-btn ${activeTab === 'push_trips' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('push_trips')}
+                    >
+                        📍 PUSH TRIPS TO PHONE
+                    </button>
+                    <button 
                         className={`mobile-tab-btn ${activeTab === 'provision' ? 'active' : ''}`}
                         onClick={() => setActiveTab('provision')}
                     >
@@ -175,7 +245,7 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                     </div>
 
                     {/* Active Tab Panel */}
-                    {activeTab === 'sync' ? (
+                    {activeTab === 'sync' && (
                         <div className="mobile-panel">
                             <div className="mobile-panel-title">Copy Offline Map Vault to Phone over USB</div>
                             <p className="mobile-panel-desc">
@@ -189,7 +259,59 @@ export const MobileSyncModal: React.FC<MobileSyncModalProps> = ({
                                 {isTransferring ? transferStatus || 'Syncing Map Vault...' : '📁 COPY ENTIRE MAP VAULT TO PHONE (USB)'}
                             </button>
                         </div>
-                    ) : (
+                    )}
+
+                    {activeTab === 'push_trips' && (
+                        <div className="mobile-panel">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                <div className="mobile-panel-title">Push Saved Trips to Phone over USB</div>
+                                <button className="mobile-refresh-btn" onClick={toggleSelectAllTrips}>
+                                    {selectedTripPaths.length === savedTrips.length ? 'Deselect All' : 'Select All'}
+                                </button>
+                            </div>
+                            <p className="mobile-panel-desc">
+                                Select desktop route itinerary files (`.json`) to push directly into the phone's trip storage (`/sdcard/IterViaeNavus/trips/`).
+                            </p>
+
+                            {savedTrips.length === 0 ? (
+                                <div className="mobile-no-device" style={{ marginBottom: 12 }}>
+                                    No saved trip itinerary files found on desktop. Save routes first using File &gt; Save Trip.
+                                </div>
+                            ) : (
+                                <div className="mobile-trip-selection-list" style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: 12 }}>
+                                    {savedTrips.map((t) => (
+                                        <div 
+                                            key={t.path}
+                                            className={`mobile-device-card ${selectedTripPaths.includes(t.path) ? 'active' : ''}`}
+                                            onClick={() => toggleTripSelection(t.path)}
+                                            style={{ cursor: 'pointer', padding: '8px 12px', marginBottom: '6px' }}
+                                        >
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedTripPaths.includes(t.path)} 
+                                                onChange={() => {}} 
+                                                style={{ marginRight: 10 }}
+                                            />
+                                            <div className="mobile-device-info">
+                                                <div className="mobile-device-name">📍 {t.name}</div>
+                                                <div className="mobile-device-id">{t.waypoint_count} Waypoints • {t.filename}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <button 
+                                className="mobile-action-btn primary"
+                                onClick={handlePushTripsToPhone}
+                                disabled={isTransferring || !selectedDevice || selectedTripPaths.length === 0}
+                            >
+                                {isTransferring ? transferStatus || 'Pushing Trips...' : `📍 PUSH ${selectedTripPaths.length} SELECTED TRIPS TO PHONE (USB)`}
+                            </button>
+                        </div>
+                    )}
+
+                    {activeTab === 'provision' && (
                         <div className="mobile-panel">
                             <div className="mobile-panel-title">Dedicated Handlebar Head Unit Provisioning</div>
                             <p className="mobile-panel-desc">
