@@ -1,3 +1,4 @@
+#[cfg(desktop)]
 mod menu;
 mod tool;
 mod commands;
@@ -50,78 +51,74 @@ pub fn run() {
             usb_transfer::push_all_maps_to_device,
             usb_transfer::provision_head_unit
             ])
-        .setup(|app| {
-            //Build and set the native menu useing modular file
-            let menu = menu::create_menu(app.handle())?;
-            app.set_menu(menu)?;
+        .setup(|_app| {
+            #[cfg(desktop)]
+            {
+                let menu = menu::create_menu(_app.handle())?;
+                _app.set_menu(menu)?;
 
-            //Listen for the menu item clickcs
-            app.on_menu_event(move |app_handle, event| {
-                let id = event.id().as_ref();
-                match id {
-                    "quit" => {
-                        app_handle.exit(0);
-                    }
-                    "mapimport" => {
-                        //Send the signal to the front end
-                        let _ = app_handle.emit("navigate-to-view", "map-loader");
-                    }
-                    "range_finder" => {
-                        let _ = app_handle.emit("toggle-range-finder", ());
-                    }
-                    "newtrip" => {
-                        //Send the signal to the front end
-                        let _ = app_handle.emit("new-trip", ());
-                    }
-                    "save" => {
-                        //Send the signal to the front end
-                        let _ = app_handle.emit("save-trip", ());
-                    }
-                    "saveas" => {
-                        //Send the signal to the front end
-                        let _ = app_handle.emit("save-as-trip", ());
-                    }
-                    "loadtrip" => {
-                        //Send the signal to the front end
-                        let _ = app_handle.emit("load-trip", ());
-                    }
-                    "opentrips" => {
-                        if let Ok(app_dir) = app_handle.path().app_data_dir() {
-                            let trips_dir = app_dir.join("trips");
-                            
-                            if !trips_dir.exists() {
-                                let _ = std::fs::create_dir_all(&trips_dir);
+                _app.on_menu_event(move |app_handle, event| {
+                    let id = event.id().as_ref();
+                    match id {
+                        "quit" => {
+                            app_handle.exit(0);
+                        }
+                        "mapimport" => {
+                            let _ = app_handle.emit("navigate-to-view", "map-loader");
+                        }
+                        "range_finder" => {
+                            let _ = app_handle.emit("toggle-range-finder", ());
+                        }
+                        "newtrip" => {
+                            let _ = app_handle.emit("new-trip", ());
+                        }
+                        "save" => {
+                            let _ = app_handle.emit("save-trip", ());
+                        }
+                        "saveas" => {
+                            let _ = app_handle.emit("save-as-trip", ());
+                        }
+                        "loadtrip" => {
+                            let _ = app_handle.emit("load-trip", ());
+                        }
+                        "opentrips" => {
+                            if let Ok(app_dir) = app_handle.path().app_data_dir() {
+                                let trips_dir = app_dir.join("trips");
+                                
+                                if !trips_dir.exists() {
+                                    let _ = std::fs::create_dir_all(&trips_dir);
+                                }
+                                
+                                let _ = app_handle.opener().open_path(trips_dir.to_string_lossy().to_string(), None::<&str>);
                             }
-                            
-                            let _ = app_handle.opener().open_path(trips_dir.to_string_lossy().to_string(), None::<&str>);
+                        }
+                        "help_guide" => {
+                            let _ = app_handle.emit("open-help-wiki", "guide");
+                        }
+                        "help_hotkeys" => {
+                            let _ = app_handle.emit("open-help-wiki", "hotkeys");
+                        }
+                        "help_about" => {
+                            let _ = app_handle.emit("open-help-wiki", "about");
+                        }
+                        "mobile_usb_sync" => {
+                            let _ = app_handle.emit("open-mobile-sync", "sync");
+                        }
+                        "mobile_provision" => {
+                            let _ = app_handle.emit("open-mobile-sync", "provision");
+                        }
+                        _ => {
+                            let themes = [
+                                "klokantech-basic", "klokantech-3d", "osm-liberty", "maptiler-basic",
+                                "maptiler-3d", "osm-bright", "toner", "fiord-color", "dark-matter", "positron"
+                            ];
+                            if themes.contains(&id) {
+                                let _ = app_handle.emit("change-theme", id);
+                            }
                         }
                     }
-                    "help_guide" => {
-                        let _ = app_handle.emit("open-help-wiki", "guide");
-                    }
-                    "help_hotkeys" => {
-                        let _ = app_handle.emit("open-help-wiki", "hotkeys");
-                    }
-                    "help_about" => {
-                        let _ = app_handle.emit("open-help-wiki", "about");
-                    }
-                    "mobile_usb_sync" => {
-                        let _ = app_handle.emit("open-mobile-sync", "sync");
-                    }
-                    "mobile_provision" => {
-                        let _ = app_handle.emit("open-mobile-sync", "provision");
-                    }
-                    _ => {
-                        let themes = [
-                            "klokantech-basic", "klokantech-3d", "osm-liberty", "maptiler-basic",
-                            "maptiler-3d", "osm-bright", "toner", "fiord-color", "dark-matter", "positron"
-                        ];
-                        if themes.contains(&id) {
-                            let _ = app_handle.emit("change-theme", id);
-                        }
-                    }
-                }
-            });
+                });
+            }
             Ok(())
         })
         .run(tauri::generate_context!())

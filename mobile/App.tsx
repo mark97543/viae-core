@@ -9,6 +9,14 @@ type ActiveScreen = 'dashboard' | 'qr-scanner' | 'map';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ActiveScreen>('dashboard');
+  const [activeMapFile, setActiveMapFile] = useState<string>('');
+  const [mapVaultDir, setMapVaultDir] = useState<string>('/sdcard/IterViaeNavus/maps/');
+
+  const handleOpenMap = (mapName: string, vaultDir: string) => {
+    setActiveMapFile(mapName);
+    setMapVaultDir(vaultDir);
+    setCurrentScreen('map');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -16,14 +24,18 @@ export default function App() {
       {currentScreen === 'dashboard' && (
         <DashboardScreen
           onOpenScanner={() => setCurrentScreen('qr-scanner')}
-          onOpenMap={() => setCurrentScreen('map')}
+          onOpenMap={handleOpenMap}
         />
       )}
       {currentScreen === 'qr-scanner' && (
         <QRScannerScreen onBack={() => setCurrentScreen('dashboard')} />
       )}
       {currentScreen === 'map' && (
-        <NavigationMapScreen onBack={() => setCurrentScreen('dashboard')} />
+        <NavigationMapScreen
+          activeMapName={activeMapFile}
+          vaultDir={mapVaultDir}
+          onBack={() => setCurrentScreen('dashboard')}
+        />
       )}
     </SafeAreaView>
   );

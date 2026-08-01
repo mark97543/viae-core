@@ -194,6 +194,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                     {THEMES.map(t => <option key={t} value={t} className="bg-neutral-800 text-white">{t}</option>)}
                 </select>
             </div>
+            
             <POIPopup display={poiPopup} setDisplay={setPoiPopup} data={poiData} onAdd={clearSearchMarker} />
             <MarkerPopup display={markerPopup} setDisplay={setMarkerPopup} data={markerData} onAdd={clearSearchMarker} />
             <EditPopup display={editPopup} setDisplay={setEditPopup} data={editData} />
@@ -218,6 +219,7 @@ export default function TacticalMap({ activeMapFile = "default.mbtiles" }: Tacti
                 flyToWaypoint={flyToWaypoint}
                 zoomToTrip={() => zoomToTrip(waypoints)}
             />
+
             <TitlePopup display={titlePopup} setDisplay={setTitlePopup} tripData={tripData} setTripData={setTripData} />
             <PrintModal display={printModalOpen} setDisplay={setPrintModalOpen} />
             <HelpWikiModal display={helpModalOpen} setDisplay={setHelpModalOpen} initialTab={helpModalTab} />

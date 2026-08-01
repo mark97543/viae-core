@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 interface DashboardScreenProps {
   onOpenScanner: () => void;
-  onOpenMap: () => void;
+  onOpenMap: (activeMapName: string, vaultDir: string) => void;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenScanner, onOpenMap }) => {
@@ -152,7 +152,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenScanner,
           <Text style={styles.actionDesc}>Handshake route payload from desktop or paper</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.actionCard, styles.actionCardPrimary]} onPress={onOpenMap} activeOpacity={0.8}>
+        <TouchableOpacity style={[styles.actionCard, styles.actionCardPrimary]} onPress={() => onOpenMap(activeMap, resolvedPath)} activeOpacity={0.8}>
           <Text style={styles.actionIcon}>🗺️</Text>
           <Text style={styles.actionTitle}>LAUNCH MAP</Text>
           <Text style={styles.actionDesc}>Open offline vector map & live GPS HUD</Text>
